@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>产品原型 · AI 线索助手客户操作页面</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:"PingFang SC","Microsoft YaHei",system-ui,sans-serif; background:#eef0f6; color:#1f2430; }
+  .banner { background:#232848; color:#cfd4ff; font-size:12.5px; padding:8px 16px; display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+  .banner b { color:#fff; }
+  .banner .btn { margin-left:auto; background:#3b4bd8; color:#fff; border:none; border-radius:6px; padding:4px 12px; font-size:12px; cursor:pointer; }
+  .app { display:flex; height:calc(100vh - 36px); min-height:560px; }
+  /* 侧边栏 */
+  .side { width:200px; background:#fff; border-right:1px solid #e6e9f5; padding:16px 10px; flex-shrink:0; display:flex; flex-direction:column; }
+  .logo { display:flex; align-items:center; gap:8px; padding:4px 8px 16px; }
+  .logo .ic { width:30px; height:30px; border-radius:8px; background:linear-gradient(135deg,#3b4bd8,#7c3aed); color:#fff; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:14px; }
+  .logo .nm { font-weight:700; font-size:14.5px; }
+  .nav { display:flex; flex-direction:column; gap:2px; }
+  .nav button { display:flex; align-items:center; gap:9px; border:none; background:none; padding:9px 10px; border-radius:8px; font-size:13.5px; color:#4a5170; cursor:pointer; text-align:left; }
+  .nav button:hover { background:#f2f4fc; }
+  .nav button.on { background:#eef0ff; color:#3b4bd8; font-weight:600; }
+  .nav .ico { width:18px; text-align:center; }
+  .side .ver { margin-top:auto; font-size:11px; color:#a0a5b8; padding:0 10px; }
+  /* 主区 */
+  .main { flex:1; overflow-y:auto; padding:20px 24px; }
+  .page { display:none; } .page.on { display:block; animation:fade .25s; }
+  @keyframes fade { from{opacity:0; transform:translateY(6px);} to{opacity:1;} }
+  .topbar { display:flex; align-items:center; margin-bottom:16px; gap:12px; }
+  .topbar h1 { font-size:18px; }
+  .topbar .crumb { font-size:12px; color:#8a90a3; }
+  .btn { background:#3b4bd8; color:#fff; border:none; border-radius:8px; padding:8px 16px; font-size:13px; cursor:pointer; }
+  .btn:hover { background:#3243c4; }
+  .btn.ghost { background:#fff; color:#3b4bd8; border:1px solid #c9d0f5; }
+  .btn.sm { padding:4px 10px; font-size:12px; border-radius:6px; }
+  /* KPI */
+  .kpis { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:16px; }
+  .kpi { background:#fff; border:1px solid #e6e9f5; border-radius:12px; padding:14px 16px; }
+  .kpi .num { font-size:22px; font-weight:700; }
+  .kpi .lbl { font-size:12px; color:#7a8095; }
+  .kpi .trend { font-size:11px; margin-top:4px; } .up { color:#0e9f6e; } .flat { color:#8a90a3; }
+  /* 卡片 */
+  .card { background:#fff; border:1px solid #e6e9f5; border-radius:12px; padding:16px 18px; margin-bottom:14px; }
+  .card h3 { font-size:14px; margin-bottom:10px; display:flex; align-items:center; gap:8px; }
+  /* 表格 */
+  table { width:100%; border-collapse:collapse; font-size:13px; }
+  th { text-align:left; color:#8a90a3; font-weight:500; font-size:12px; padding:8px 10px; border-bottom:1px solid #eef0f6; }
+  td { padding:10px; border-bottom:1px solid #f2f4f9; }
+  tr.clk { cursor:pointer; } tr.clk:hover td { background:#f7f8ff; }
+  .badge { font-size:11px; padding:2px 9px; border-radius:12px; font-weight:600; }
+  .b-sql { background:#e8ebff; color:#3b4bd8; } .b-mql { background:#f3efff; color:#7c3aed; } .b-inv { background:#f1f2f6; color:#8a90a3; }
+  .ring { display:inline-block; }
+  /* 详情页 */
+  .detail { display:grid; grid-template-columns:280px 1fr; gap:14px; }
+  @media (max-width:900px){ .detail{grid-template-columns:1fr;} .kpis{grid-template-columns:repeat(2,1fr);} }
+  .info dl { font-size:13px; } .info dt { color:#8a90a3; font-size:12px; margin-top:10px; } .info dd { margin-top:2px; }
+  .bar { height:8px; background:#eef0f6; border-radius:4px; overflow:hidden; margin-top:4px; }
+  .bar i { display:block; height:100%; border-radius:4px; background:linear-gradient(90deg,#3b4bd8,#7c3aed); }
+  .score-item { margin-bottom:12px; font-size:12.5px; display:flex; justify-content:space-between; }
+  .msg-card { background:#f7f8ff; border:1px solid #dfe3f8; border-radius:10px; padding:12px 14px; font-size:13px; margin-bottom:10px; position:relative; }
+  .msg-card .who { font-weight:600; margin-bottom:4px; display:flex; gap:8px; align-items:center; }
+  .copy { position:absolute; right:10px; top:10px; font-size:11px; color:#3b4bd8; background:#fff; border:1px solid #c9d0f5; border-radius:6px; padding:2px 8px; cursor:pointer; }
+  /* 知识库 */
+  .kb-item { display:flex; align-items:center; gap:12px; padding:10px 4px; border-bottom:1px solid #f2f4f9; font-size:13px; }
+  .kb-item .fic { width:34px; height:34px; border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:11px; color:#fff; font-weight:700; }
+  .searchbox { display:flex; gap:8px; margin-bottom:12px; }
+  .searchbox input { flex:1; border:1px solid #dfe3f3; border-radius:8px; padding:8px 12px; font-size:13px; outline:none; }
+  .searchbox input:focus { border-color:#3b4bd8; }
+  .ret { background:#f7f8ff; border:1px solid #dfe3f8; border-radius:8px; padding:10px 12px; font-size:12.5px; margin-bottom:8px; display:none; }
+  /* 原型说明 */
+  .spec li { font-size:13px; margin:8px 0 8px 20px; }
+  .spec h4 { font-size:13.5px; margin:14px 0 4px; color:#232848; }
+  .spec code { background:#eef0ff; color:#3b4bd8; border-radius:4px; padding:1px 6px; font-size:12px; }
+  .empty { text-align:center; color:#a0a5b8; font-size:13px; padding:30px 0; }
+</style>
+</head>
+<body>
+<div class="banner">📐 <b>产品原型说明</b>：客户操作视角的高保真原型（对应加分项「产品原型」）。点击左侧导航切换页面、点击线索行查看 AI 评分详情。<button class="btn" onclick="go('spec')">查看墨刀复刻指南 →</button></div>
+
+<div class="app">
+  <aside class="side">
+    <div class="logo"><div class="ic">AI</div><div class="nm">AI 线索助手</div></div>
+    <nav class="nav">
+      <button class="on" data-p="dash" onclick="go('dash')"><span class="ico">📊</span>线索工作台</button>
+      <button data-p="detail" onclick="go('detail')"><span class="ico">🔍</span>线索详情</button>
+      <button data-p="kb" onclick="go('kb')"><span class="ico">📚</span>知识库管理</button>
+      <button data-p="msg" onclick="go('msg')"><span class="ico">✉️</span>跟进消息中心</button>
+      <button data-p="spec" onclick="go('spec')"><span class="ico">📐</span>原型说明/墨刀指南</button>
+    </nav>
+    <div class="ver">原型 v1.0 · 基于评分模型<br>属性45+行为25+意图30</div>
+  </aside>
+
+  <main class="main">
+
+    <!-- 1 工作台 -->
+    <section class="page on" id="p-dash">
+      <div class="topbar"><div><h1>线索工作台</h1><div class="crumb">工作台 / 线索工作台</div></div><button class="btn" style="margin-left:auto" onclick="go('msg')">⚡ 批量生成跟进消息</button></div>
+      <div class="kpis">
+        <div class="kpi"><div class="num">128</div><div class="lbl">今日新增线索</div><div class="trend up">↑ 12% 较昨日</div></div>
+        <div class="kpi"><div class="num" style="color:#3b4bd8">31</div><div class="lbl">SQL 待跟进</div><div class="trend up">↑ 5 较昨日</div></div>
+        <div class="kpi"><div class="num" style="color:#7c3aed">64</div><div class="lbl">MQL 培育中</div><div class="trend flat">— 持平</div></div>
+        <div class="kpi"><div class="num" style="color:#0e9f6e">18.6%</div><div class="lbl">线索→商机转化率</div><div class="trend up">↑ 1.2pct 较上周</div></div>
+      </div>
+      <div class="card">
+        <h3>📥 实时线索流 <span style="font-weight:400;font-size:12px;color:#8a90a3">（AI 已自动打分，点击行查看详情）</span></h3>
+        <table>
+          <thead><tr><th>客户</th><th>公司 / 行业</th><th>岗位</th><th>留言摘要</th><th>AI 评分</th><th>等级</th><th>操作</th></tr></thead>
+          <tbody>
+            <tr class="clk" onclick="go('detail')"><td><b>王经理</b></td><td>苏州智造设备 · 制造业</td><td>IT负责人</td><td>旧CRM想嵌AI评分，支持API对接吗？</td><td><svg width="34" height="34" viewBox="0 0 34 34" class="ring"><circle cx="17" cy="17" r="13" fill="none" stroke="#eef0f6" stroke-width="4"/><circle cx="17" cy="17" r="13" fill="none" stroke="#3b4bd8" stroke-width="4" stroke-dasharray="67 81.7" stroke-linecap="round" transform="rotate(-90 17 17)"/><text x="17" y="21" text-anchor="middle" font-size="10" font-weight="700" fill="#3b4bd8">82</text></svg></td><td><span class="badge b-sql">SQL</span></td><td><button class="btn sm">跟进</button></td></tr>
+            <tr class="clk" onclick="go('detail2')"><td><b>张主管</b></td><td>杭州电商科技 · 零售电商</td><td>普通员工</td><td>先了解一下功能，推荐给团队看看</td><td><svg width="34" height="34" viewBox="0 0 34 34" class="ring"><circle cx="17" cy="17" r="13" fill="none" stroke="#eef0f6" stroke-width="4"/><circle cx="17" cy="17" r="13" fill="none" stroke="#7c3aed" stroke-width="4" stroke-dasharray="35.9 81.7" stroke-linecap="round" transform="rotate(-90 17 17)"/><text x="17" y="21" text-anchor="middle" font-size="10" font-weight="700" fill="#7c3aed">44</text></svg></td><td><span class="badge b-mql">MQL</span></td><td><button class="btn sm ghost">培育</button></td></tr>
+            <tr class="clk" onclick="go('detail3')"><td><b>赵同学</b></td><td>个人 · 学生</td><td>学生</td><td>写作业需要了解CRM概念</td><td><svg width="34" height="34" viewBox="0 0 34 34" class="ring"><circle cx="17" cy="17" r="13" fill="none" stroke="#eef0f6" stroke-width="4"/><circle cx="17" cy="17" r="13" fill="none" stroke="#c9cdd9" stroke-width="4" stroke-dasharray="9.8 81.7" stroke-linecap="round" transform="rotate(-90 17 17)"/><text x="17" y="21" text-anchor="middle" font-size="10" font-weight="700" fill="#8a90a3">12</text></svg></td><td><span class="badge b-inv">无效</span></td><td><button class="btn sm ghost">归档</button></td></tr>
+            <tr class="clk" onclick="go('detail')"><td><b>李总监</b></td><td>深圳金控集团 · 金融</td><td>采购负责人</td><td>报价什么范围？有预算，下月启动</td><td><svg width="34" height="34" viewBox="0 0 34 34" class="ring"><circle cx="17" cy="17" r="13" fill="none" stroke="#eef0f6" stroke-width="4"/><circle cx="17" cy="17" r="13" fill="none" stroke="#3b4bd8" stroke-width="4" stroke-dasharray="63.7 81.7" stroke-linecap="round" transform="rotate(-90 17 17)"/><text x="17" y="21" text-anchor="middle" font-size="10" font-weight="700" fill="#3b4bd8">78</text></svg></td><td><span class="badge b-sql">SQL</span></td><td><button class="btn sm">跟进</button></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="card"><h3>🤖 AI 自动化动作（近 24h）</h3>
+        <table>
+          <thead><tr><th>时间</th><th>动作</th><th>对象</th><th>结果</th></tr></thead>
+          <tbody>
+            <tr><td>14:02</td><td>自动生成跟进话术</td><td>王经理（SQL 82分）</td><td style="color:#0e9f6e">✓ 已生成，待销售确认发送</td></tr>
+            <tr><td>13:47</td><td>知识库检索</td><td>李总监留言「报价」</td><td style="color:#0e9f6e">✓ 命中《产品报价说明》3 段</td></tr>
+            <tr><td>11:20</td><td>自动分级归档</td><td>赵同学（12分）</td><td style="color:#8a90a3">已标记无效，不占用销售人力</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- 2 详情页 -->
+    <section class="page" id="p-detail">
+      <div class="topbar"><div><h1>线索详情 · 王经理</h1><div class="crumb">工作台 / 线索详情 / L0001</div></div><button class="btn ghost sm" style="margin-left:auto" onclick="go('dash')">← 返回列表</button></div>
+      <div class="detail">
+        <div class="card info">
+          <h3>👤 线索信息</h3>
+          <dl>
+            <dt>客户</dt><dd><b>王经理</b>（IT负责人/技术总监）</dd>
+            <dt>公司</dt><dd>苏州智造设备 · 制造业 · 201-1000人</dd>
+            <dt>来源渠道</dt><dd>官网表单</dd>
+            <dt>行为轨迹</dt><dd>预约演示 · 浏览价格页 · 官网多次访问</dd>
+            <dt>客户留言</dt><dd style="background:#f7f8ff;border-radius:8px;padding:8px 10px;margin-top:4px">"我们的旧CRM想把AI评分嵌进去，支持iframe和API对接吗？想约个演示"</dd>
+            <dt>AI 总分</dt><dd><span style="font-size:26px;font-weight:700;color:#3b4bd8">82</span> <span class="badge b-sql">SQL · 建议立即跟进</span></dd>
+          </dl>
+        </div>
+        <div>
+          <div class="card">
+            <h3>🧮 AI 评分过程（透明可解释）</h3>
+            <div class="score-item"><span>属性分 <span style="color:#8a90a3">(行业20 + 规模11 + 岗位13)</span></span><b>44 / 45</b></div><div class="bar"><i style="width:97%"></i></div>
+            <div class="score-item" style="margin-top:10px"><span>行为分 <span style="color:#8a90a3">(预约10+价格页6+多次访问2…)</span></span><b>20 / 25</b></div><div class="bar"><i style="width:80%"></i></div>
+            <div class="score-item" style="margin-top:10px"><span>意图分 <span style="color:#8a90a3">(识别到：集成对接 + 约演示)</span></span><b>18 / 30</b></div><div class="bar"><i style="width:60%"></i></div>
+            <div style="font-size:12px;color:#7a8095;margin-top:10px">规则：≥60 SQL · ≥30 MQL · &lt;30 无效。每项得分均可追溯到具体字段，销售可手动申诉调整。</div>
+          </div>
+          <div class="card">
+            <h3>💬 AI 生成跟进话术 <span style="font-weight:400;font-size:12px;color:#8a90a3">（依据知识库）</span></h3>
+            <div class="msg-card"><span class="copy" onclick="copyMsg(this)">复制</span><div class="who">📞 电话开场 30 秒</div>王经理您好，看到您提到想把 AI 评分嵌入现有 CRM——我们支持标准 API 和 iframe 两种对接方式，制造业已有苏州某设备厂落地方案。您今天下午或明天上午方便的话，我安排技术顾问带 Demo 上门演示？</div>
+            <div class="msg-card"><span class="copy" onclick="copyMsg(this)">复制</span><div class="who">✉️ 微信/邮件版</div>您好王经理，您关心的两点回复如下：① 对接：提供 REST API + iframe 嵌入，附开发文档，平均 3 个工作日完成联调；② 演示：已为您预留周三 15:00 线上演示名额（含贵司行业案例），如时间不合适回复改期即可。</div>
+            <div style="font-size:12px;color:#8a90a3">📚 引用来源：《产品功能介绍》§2.3 开放接口 · 《制造业客户案例集》案例 #07</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2b 详情页（MQL变体，共用结构） -->
+    <section class="page" id="p-detail2">
+      <div class="topbar"><div><h1>线索详情 · 张主管</h1><div class="crumb">工作台 / 线索详情 / L0002</div></div><button class="btn ghost sm" style="margin-left:auto" onclick="go('dash')">← 返回列表</button></div>
+      <div class="detail">
+        <div class="card info">
+          <h3>👤 线索信息</h3>
+          <dl>
+            <dt>客户</dt><dd><b>张主管</b>（普通员工）</dd>
+            <dt>公司</dt><dd>杭州电商科技 · 零售电商 · 51-200人</dd>
+            <dt>客户留言</dt><dd style="background:#f7f8ff;border-radius:8px;padding:8px 10px;margin-top:4px">"先了解一下功能，后面推荐给团队一起看看"</dd>
+            <dt>AI 总分</dt><dd><span style="font-size:26px;font-weight:700;color:#7c3aed">44</span> <span class="badge b-mql">MQL · 进培育池</span></dd>
+          </dl>
+        </div>
+        <div>
+          <div class="card"><h3>🌱 AI 推荐培育动作</h3>
+            <div class="msg-card"><span class="copy" onclick="copyMsg(this)">复制</span><div class="who">✉️ 培育邮件（第 1 封 · 行业案例向）</div>张主管您好，感谢关注！为您挑选了零售电商行业的 3 个 AI 线索管理案例（平均提升跟进效率 40%），适合转发给团队一起评估：[案例链接]。如需针对贵司场景的定制演示，随时回复预约。</div>
+            <div style="font-size:12px;color:#8a90a3">📚 引用来源：《零售电商客户案例集》· 培育 SOP 第 2 步：案例触达</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2c 详情页（无效变体） -->
+    <section class="page" id="p-detail3">
+      <div class="topbar"><div><h1>线索详情 · 赵同学</h1><div class="crumb">工作台 / 线索详情 / L0003</div></div><button class="btn ghost sm" style="margin-left:auto" onclick="go('dash')">← 返回列表</button></div>
+      <div class="detail">
+        <div class="card info">
+          <h3>👤 线索信息</h3>
+          <dl>
+            <dt>客户</dt><dd><b>赵同学</b>（学生）</dd>
+            <dt>公司</dt><dd>个人 · 学生个人</dd>
+            <dt>客户留言</dt><dd style="background:#f7f8ff;border-radius:8px;padding:8px 10px;margin-top:4px">"学生，写作业需要了解一下CRM是什么概念"</dd>
+            <dt>AI 总分</dt><dd><span style="font-size:26px;font-weight:700;color:#8a90a3">12</span> <span class="badge b-inv">无效 · 自动归档</span></dd>
+          </dl>
+        </div>
+        <div>
+          <div class="card"><h3>🗂 系统处理</h3>
+            <p style="font-size:13px;color:#4a5170">AI 识别为学生作业类留言，属性分（学生 0）+ 意图分（0-5）远低于 MQL 门槛 30 分。已自动归档至「无效线索池」并附标准回复模板，不推送销售队列 —— 这正是自动分级 <b>过滤噪音、保护销售人效</b> 的价值。</p>
+            <div class="msg-card" style="margin-top:10px"><span class="copy" onclick="copyMsg(this)">复制</span><div class="who">🤖 标准自动回复</div>感谢关注！学习资料包已发送：[CRM 入门 12 页 PDF]，祝学习顺利。也欢迎加入我们的学生体验计划，可免费使用教育版 3 个月。</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3 知识库 -->
+    <section class="page" id="p-kb">
+      <div class="topbar"><div><h1>知识库管理（RAG）</h1><div class="crumb">工作台 / 知识库管理</div></div><button class="btn" style="margin-left:auto">＋ 上传文档</button></div>
+      <div class="card">
+        <h3>📚 已接入文档（3）—— AI 回答与话术的全部依据</h3>
+        <div class="kb-item"><div class="fic" style="background:#3b4bd8">PDF</div><div style="flex:1"><b>产品功能介绍.pdf</b><div style="font-size:12px;color:#8a90a3">18 页 · 已解析 214 段 · 覆盖：功能清单 / 开放接口 / 版本差异</div></div><span class="badge b-sql">已生效</span><button class="btn sm ghost">预览</button></div>
+        <div class="kb-item"><div class="fic" style="background:#0e9f6e">DOC</div><div style="flex:1"><b>常见问题 FAQ.docx</b><div style="font-size:12px;color:#8a90a3">6 页 · 已解析 89 段 · 覆盖：报价口径 / 数据安全 / 实施周期</div></div><span class="badge b-sql">已生效</span><button class="btn sm ghost">预览</button></div>
+        <div class="kb-item"><div class="fic" style="background:#7c3aed">PDF</div><div style="flex:1"><b>客户案例集.pdf</b><div style="font-size:12px;color:#8a90a3">12 页 · 已解析 156 段 · 覆盖：制造业/金融/电商落地案例与效果数据</div></div><span class="badge b-sql">已生效</span><button class="btn sm ghost">预览</button></div>
+      </div>
+      <div class="card">
+        <h3>🧪 检索测试（验证知识库命中效果）</h3>
+        <div class="searchbox"><input id="kbq" placeholder="输入客户可能的问题，如：支持API对接吗 / 数据安全怎么保障" value="支持API对接吗？"><button class="btn" onclick="kbSearch()">测试检索</button></div>
+        <div class="ret" id="kr1">🎯 命中 3 段（top_k=3）：<br>① 《产品功能介绍》§2.3 开放接口 —— "提供 REST API 与 iframe 嵌入两种方式，附 SDK 与开发文档…"<br>② 《常见问题 FAQ》Q12 —— "API 调用限额与鉴权方式说明…"<br>③ 《客户案例集》案例#07 —— "苏州某设备厂通过 API 将 AI 评分嵌入自建 CRM…"（相似度 0.91）</div>
+      </div>
+    </section>
+
+    <!-- 4 消息中心 -->
+    <section class="page" id="p-msg">
+      <div class="topbar"><div><h1>跟进消息中心</h1><div class="crumb">工作台 / 跟进消息中心</div></div></div>
+      <div class="card">
+        <h3>⚡ 批量生成（对应自动化脚本能力）</h3>
+        <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;font-size:13px">
+          <span>筛选：</span>
+          <select style="border:1px solid #dfe3f3;border-radius:8px;padding:7px 10px"><option>全部 SQL（31 条）</option><option>全部 MQL（64 条）</option><option>今日新增（128 条）</option></select>
+          <span>风格：</span>
+          <select style="border:1px solid #dfe3f3;border-radius:8px;padding:7px 10px"><option>电话开场 30 秒</option><option>微信/邮件版</option></select>
+          <button class="btn" id="genBtn" onclick="genMsgs()">🚀 AI 批量生成</button>
+        </div>
+        <div id="genOut" style="margin-top:14px"></div>
+      </div>
+    </section>
+
+    <!-- 5 原型说明 -->
+    <section class="page" id="p-spec">
+      <div class="topbar"><div><h1>原型说明 & 墨刀复刻指南</h1><div class="crumb">本页不是产品页面，是给评审/复刻用的说明书</div></div></div>
+      <div class="card spec">
+        <h4>一、原型定位（面试怎么讲）</h4>
+        <li>这是「AI 线索助手」的<b>客户操作页面原型</b>：回答"客户买回去之后，每天在哪用、看到什么、点哪里"。</li>
+        <li>核心叙事：<code>线索自动流入 → AI 透明打分 → 一键生成话术 → 无效自动过滤</code>，对应售前演示的 4 个记忆点。</li>
+        <h4>二、页面清单（5 页）</h4>
+        <li>① 线索工作台：4 个 KPI 卡 + 实时线索表（评分环 + 等级标签）+ AI 动作流水。</li>
+        <li>② 线索详情（×3 变体 SQL/MQL/无效）：左侧线索卡，右侧评分过程条 + 话术卡（引用知识库来源）。</li>
+        <li>③ 知识库管理：文档列表 + 相似度检索测试 —— 向客户解释 RAG "答案有出处"。</li>
+        <li>④ 跟进消息中心：按等级/风格批量生成，对应 Python 自动化脚本。</li>
+        <li>⑤ 原型说明（本页）。</li>
+        <h4>三、墨刀复刻要点（约 2~3 小时）</h4>
+        <li>新建 <code>Web 应用 - 桌面端 1440×900</code> 项目，母版放左侧 200px 导航栏 + 顶部面包屑，其余页面复用母版。</li>
+        <li>组件对应：KPI 卡=容器+文本；评分环=圆形进度组件（或图标+数字）；等级标签=状态标签组件；表格=数据表格组件。</li>
+        <li>交互设置：导航按钮加"跳转到页面"；线索行加"点击跳转详情"；话术卡加"复制"的提示态。原型级别做<b>页面跳转 + hover 态</b>即可，不必做真实复制。</li>
+        <li>配色速记：主色 <code>#3B4BD8</code>、辅紫 <code>#7C3AED</code>、背景 <code>#EEF0F6</code>、边框 <code>#E6E9F5</code>、文字 <code>#1F2430</code>；SQL=蓝、MQL=紫、无效=灰。</li>
+        <li>页面间用 3 条连线讲演示动线：工作台→详情（看打分）→消息中心（看自动化），知识库页做答疑备用。</li>
+        <h4>四、本原型的可演示交互</h4>
+        <li>导航切换 5 页 · 线索行点击进对应详情 · 话术"复制"真可复制 · 知识库"测试检索"展示命中片段 · 消息中心一键批量生成。</li>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<script>
+function go(p){
+  document.querySelectorAll('.page').forEach(e=>e.classList.remove('on'));
+  document.getElementById('p-'+p).classList.add('on');
+  document.querySelectorAll('.nav button').forEach(b=>b.classList.toggle('on', b.dataset.p===p || (p.startsWith('detail')&&b.dataset.p==='detail')));
+  document.querySelector('.main').scrollTop=0;
+}
+function copyMsg(el){
+  const txt=el.parentElement.innerText.replace('复制','').trim();
+  (navigator.clipboard?navigator.clipboard.writeText(txt):Promise.reject()).catch(()=>{});
+  const old=el.textContent; el.textContent='已复制 ✓'; setTimeout(()=>el.textContent=old,1200);
+}
+function kbSearch(){
+  const r=document.getElementById('kr1'); r.style.display='block'; r.style.animation='fade .3s';
+}
+function genMsgs(){
+  const out=document.getElementById('genOut'), btn=document.getElementById('genBtn');
+  btn.disabled=true; btn.textContent='⏳ AI 生成中…';
+  out.innerHTML='<div class="empty">正在调用工作流：读取线索 → 知识库检索 → 生成个性化话术…</div>';
+  setTimeout(()=>{
+    const data=[
+      ['王经理 · 苏州智造设备','SQL 82分','王经理您好，看到您提到想把 AI 评分嵌入现有 CRM——我们支持标准 API 和 iframe 对接，制造业已有落地方案，方便约个 30 分钟演示吗？'],
+      ['李总监 · 深圳金控集团','SQL 78分','李总监您好，关于报价：51-200 人规模建议专业版（按年付有 85 折），金融行业数据隔离方案我们可单独讲解，您下月启动前我可以先发一版选型对比表。'],
+      ['刘工 · 上海医疗设备','SQL 75分','刘工您好，HIS 系统对接我们已有医疗行业先例（接口文档可先发您评估），数据安全支持私有化部署 + 审计日志，详细方案文档稍后发您邮箱。'],
+      ['张主管 · 杭州电商科技','MQL 44分','张主管您好，为您准备了零售电商行业 3 个 AI 线索管理案例（跟进效率平均提升 40%），适合转发团队评估，需要定制演示随时回复。']
+    ];
+    out.innerHTML='<div class="card" style="border-style:dashed;margin-bottom:10px;font-size:12px;color:#0e9f6e">✓ 已生成 4 条（演示数据），每条均基于该线索的行业/岗位/留言 + 知识库检索结果个性化</div>'+
+    data.map(d=>'<div class="msg-card"><span class="copy" onclick="copyMsg(this)">复制</span><div class="who">'+d[0]+' <span class="badge '+(d[1].includes('SQL')?'b-sql':'b-mql')+'">'+d[1]+'</span></div>'+d[2]+'</div>').join('');
+    btn.disabled=false; btn.textContent='🚀 AI 批量生成';
+  },1400);
+}
+</script>
+</body>
+</html>

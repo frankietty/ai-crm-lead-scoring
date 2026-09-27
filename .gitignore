@@ -1,0 +1,9 @@
+# Python
+__pycache__/
+*.pyc
+
+# Office 锁文件 / 系统文件
+~$*.xlsx
+~$*.docx
+.DS_Store
+Thumbs.db

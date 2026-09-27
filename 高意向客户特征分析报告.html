@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>高意向客户特征分析报告 · AI CRM 线索助手</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:"PingFang SC","Microsoft YaHei",system-ui,sans-serif; background:#f4f6fb; color:#1f2430; line-height:1.65; }
+  .wrap { max-width:960px; margin:0 auto; padding:24px 20px 60px; }
+  .hero { background:linear-gradient(120deg,#eef1ff 0%,#f7f0ff 100%); border:1px solid #e3e6f5; border-radius:16px; padding:28px 28px 22px; margin-bottom:20px; }
+  .hero h1 { font-size:24px; letter-spacing:.5px; color:#232848; }
+  .hero p.sub { color:#5a6072; font-size:14px; margin-top:6px; }
+  .tags { margin-top:12px; display:flex; flex-wrap:wrap; gap:8px; }
+  .tag { font-size:12px; padding:3px 10px; border-radius:20px; background:#fff; border:1px solid #dfe3f3; color:#4a5170; }
+  .kpis { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin:18px 0 20px; }
+  .kpi { background:#fff; border:1px solid #e6e9f5; border-radius:14px; padding:14px 16px; }
+  .kpi .num { font-size:24px; font-weight:700; color:#3b4bd8; }
+  .kpi .num.green { color:#0e9f6e; } .kpi .num.gray { color:#8a90a3; } .kpi .num.purple { color:#7c3aed; }
+  .kpi .lbl { font-size:12px; color:#7a8095; margin-top:2px; }
+  .card { background:#fff; border:1px solid #e6e9f5; border-radius:14px; padding:20px 22px; margin-bottom:16px; }
+  .card h2 { font-size:16px; color:#232848; margin-bottom:2px; }
+  .card p.desc { font-size:12.5px; color:#7a8095; margin-bottom:12px; }
+  .insight { margin-top:10px; font-size:13px; color:#3b4256; background:#f6f7ff; border-left:3px solid #6d7cff; padding:8px 12px; border-radius:0 8px 8px 0; }
+  .grid2 { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+  @media (max-width:760px){ .kpis{grid-template-columns:repeat(2,1fr);} .grid2{grid-template-columns:1fr;} }
+  .concl { border-left:4px solid #3b4bd8; }
+  .concl h3 { font-size:14px; margin-bottom:4px; color:#232848; }
+  .concl p { font-size:13px; color:#4a5170; }
+  .concl .no { display:inline-block; width:22px; height:22px; border-radius:50%; background:#3b4bd8; color:#fff; text-align:center; line-height:22px; font-size:12px; margin-right:8px; }
+  .quote { background:linear-gradient(120deg,#232848,#3b4bd8); color:#fff; border-radius:14px; padding:20px 22px; margin:20px 0; }
+  .quote h2 { color:#fff; font-size:16px; margin-bottom:8px; }
+  .quote p { font-size:13.5px; opacity:.94; }
+  .foot { font-size:12px; color:#8a90a3; background:#fff; border:1px dashed #d8dcea; border-radius:12px; padding:14px 18px; }
+  .foot li { margin-left:18px; margin-top:4px; }
+  svg text { font-family:inherit; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="hero">
+    <h1>高意向客户特征分析报告</h1>
+    <p class="sub">AI CRM 线索评分助手 · 数据分析交付物 —— 对 300 条商机线索做分层统计，回答一个问题：<b>谁最可能买单？</b></p>
+    <div class="tags">
+      <span class="tag">样本：300 条已留资商机（模拟数据）</span>
+      <span class="tag">评分口径：属性分45 + 行为分25 + 意图分30</span>
+      <span class="tag">分级：≥60 SQL · ≥30 MQL · &lt;30 无效</span>
+      <span class="tag">分析维度：行业 / 岗位 / 规模 / 行为 / 意图 / 渠道</span>
+    </div>
+  </div>
+
+  <div class="kpis">
+    <div class="kpi"><div class="num">70 <span style="font-size:13px;color:#8a90a3">条 · 23.3%</span></div><div class="lbl">SQL 销售合格线索</div></div>
+    <div class="kpi"><div class="num purple">196 <span style="font-size:13px;color:#8a90a3">条 · 65.3%</span></div><div class="lbl">MQL 市场合格线索</div></div>
+    <div class="kpi"><div class="num gray">34 <span style="font-size:13px;color:#8a90a3">条 · 11.3%</span></div><div class="lbl">无效线索（可自动过滤）</div></div>
+    <div class="kpi"><div class="num green">47.0</div><div class="lbl">线索平均总分</div></div>
+  </div>
+
+  <!-- 图1 等级分布 -->
+  <div class="card">
+    <h2>① 意向等级分布</h2>
+    <p class="desc">按评分模型自动分级：SQL 70 / MQL 196 / 无效 34</p>
+    <svg viewBox="0 0 640 200" width="100%">
+        <!-- donut: C=2πr≈389.6  SQL23.3%→90.8  MQL65.3%→254.4  无效11.3%→44.0 -->
+      <g transform="translate(130,100)">
+        <circle r="62" fill="none" stroke="#e8ebf7" stroke-width="26"/>
+        <circle r="62" fill="none" stroke="#3b4bd8" stroke-width="26" stroke-dasharray="90.8 298.8" transform="rotate(-90)"/>
+        <circle r="62" fill="none" stroke="#8f9bff" stroke-width="26" stroke-dasharray="254.4 135.2" transform="rotate(-6)"/>
+        <circle r="62" fill="none" stroke="#c9cdd9" stroke-width="26" stroke-dasharray="44.0 345.6" transform="rotate(229)"/>
+        <text y="-2" text-anchor="middle" font-size="22" font-weight="700" fill="#232848">300</text>
+        <text y="18" text-anchor="middle" font-size="11" fill="#7a8095">条线索</text>
+      </g>
+      <g font-size="13" fill="#3b4256">
+        <rect x="290" y="52" width="12" height="12" rx="3" fill="#3b4bd8"/><text x="310" y="63">SQL 销售合格 · 70 条（23.3%）— 直接转销售跟进</text>
+        <rect x="290" y="92" width="12" height="12" rx="3" fill="#8f9bff"/><text x="310" y="103">MQL 市场合格 · 196 条（65.3%）— 进培育池</text>
+        <rect x="290" y="132" width="12" height="12" rx="3" fill="#c9cdd9"/><text x="310" y="143">无效 · 34 条（11.3%）— 自动过滤不占用人力</text>
+      </g>
+    </svg>
+    <div class="insight">分级前置的价值：销售只需人工跟进 70 条 SQL，人效理论提升约 <b>4.3 倍</b>（300→70）。</div>
+  </div>
+
+  <!-- 图2 行业 -->
+  <div class="card">
+    <h2>② 行业 × SQL 率</h2>
+    <p class="desc">SQL 率 = 该行业线索中 SQL 占比（括号内为样本量）</p>
+    <svg viewBox="0 0 640 300" width="100%">
+      <g font-size="12.5">
+        <!-- max 42% -> 420px scale: rate*9 -->
+        <text x="108" y="26" text-anchor="end" fill="#3b4256">金融 (36)</text><rect x="116" y="14" width="378" height="16" rx="8" fill="#3b4bd8"/><text x="502" y="26" font-weight="700" fill="#3b4bd8">42%</text>
+        <text x="108" y="54" text-anchor="end" fill="#3b4256">制造业 (60)</text><rect x="116" y="42" width="333" height="16" rx="8" fill="#4c5ce0"/><text x="457" y="54" font-weight="700" fill="#4c5ce0">37%</text>
+        <text x="108" y="82" text-anchor="end" fill="#3b4256">软件/互联网 (57)</text><rect x="116" y="70" width="297" height="16" rx="8" fill="#5d6de8"/><text x="421" y="82" font-weight="700" fill="#5d6de8">33%</text>
+        <text x="108" y="110" text-anchor="end" fill="#3b4256">教育 (17)</text><rect x="116" y="98" width="216" height="16" rx="8" fill="#8f9bff"/><text x="340" y="110" fill="#8f9bff" font-weight="700">24%</text>
+        <text x="108" y="138" text-anchor="end" fill="#3b4256">其他 (17)</text><rect x="116" y="126" width="162" height="16" rx="8" fill="#8f9bff"/><text x="286" y="138" fill="#8f9bff" font-weight="700">18%</text>
+        <text x="108" y="166" text-anchor="end" fill="#3b4256">政府/事业单位 (15)</text><rect x="116" y="154" width="117" height="16" rx="8" fill="#aeb6ff"/><text x="241" y="166" fill="#aeb6ff" font-weight="700">13%</text>
+        <text x="108" y="194" text-anchor="end" fill="#3b4256">专业服务 (19)</text><rect x="116" y="182" width="99" height="16" rx="8" fill="#aeb6ff"/><text x="223" y="194" fill="#aeb6ff" font-weight="700">11%</text>
+        <text x="108" y="222" text-anchor="end" fill="#3b4256">医疗 (20)</text><rect x="116" y="210" width="90" height="16" rx="8" fill="#aeb6ff"/><text x="214" y="222" fill="#aeb6ff" font-weight="700">10%</text>
+        <text x="108" y="250" text-anchor="end" fill="#3b4256">零售电商 (38)</text><rect x="116" y="238" width="27" height="16" rx="8" fill="#c9cdd9"/><text x="151" y="250" fill="#8a90a3" font-weight="700">3%</text>
+        <text x="108" y="278" text-anchor="end" fill="#3b4256">学生个人 (21)</text><rect x="116" y="266" width="4" height="16" rx="2" fill="#c9cdd9"/><text x="128" y="278" fill="#8a90a3" font-weight="700">0%</text>
+      </g>
+    </svg>
+    <div class="insight">金融、制造业、软件/互联网是绝对主力：三个行业样本占 51%，却贡献了 <b>80%</b>（56/70）的 SQL。零售电商高意向率虽高（97% 为 MQL+），但几乎全是"看看再说"型 MQL。</div>
+  </div>
+
+  <div class="grid2">
+    <!-- 图3 岗位 -->
+    <div class="card">
+      <h2>③ 岗位 × SQL 率</h2>
+      <p class="desc">决策角色 vs 执行角色，差距悬殊</p>
+      <svg viewBox="0 0 440 190" width="100%">
+        <g font-size="12">
+          <text x="128" y="24" text-anchor="end" fill="#3b4256">采购/商务负责人</text><rect x="136" y="12" width="196" height="15" rx="7" fill="#3b4bd8"/><text x="340" y="24" font-weight="700" fill="#3b4bd8">49%</text>
+          <text x="128" y="52" text-anchor="end" fill="#3b4256">IT负责人/技术总监</text><rect x="136" y="40" width="160" height="15" rx="7" fill="#4c5ce0"/><text x="304" y="52" font-weight="700" fill="#4c5ce0">40%</text>
+          <text x="128" y="80" text-anchor="end" fill="#3b4256">销售/市场负责人</text><rect x="136" y="68" width="72" height="15" rx="7" fill="#8f9bff"/><text x="216" y="80" font-weight="700" fill="#8f9bff">18%</text>
+          <text x="128" y="108" text-anchor="end" fill="#3b4256">普通员工</text><rect x="136" y="96" width="48" height="15" rx="7" fill="#aeb6ff"/><text x="192" y="108" font-weight="700" fill="#aeb6ff">12%</text>
+          <text x="128" y="136" text-anchor="end" fill="#3b4256">学生</text><rect x="136" y="124" width="4" height="15" rx="2" fill="#c9cdd9"/><text x="148" y="136" fill="#8a90a3" font-weight="700">0%</text>
+        </g>
+        <text x="136" y="168" font-size="11.5" fill="#7a8095">平均总分：采购 59.1 · IT 55.9 · 销售 49.3 · 员工 43.4 · 学生 9.7</text>
+      </svg>
+      <div class="insight">采购/IT 负责人的 SQL 率是普通员工的 <b>3~4 倍</b> —— "谁来问"比"哪家公司问"更能预测成交。</div>
+    </div>
+
+    <!-- 图4 规模 -->
+    <div class="card">
+      <h2>④ 公司规模 × SQL 率</h2>
+      <p class="desc">规模推高平均分，但几乎不改变 SQL 率</p>
+      <svg viewBox="0 0 440 190" width="100%">
+        <g font-size="12">
+          <text x="118" y="24" text-anchor="end" fill="#3b4256">201-1000人 (54)</text><rect x="126" y="12" width="112" height="15" rx="7" fill="#3b4bd8"/><text x="246" y="24" font-weight="700" fill="#3b4bd8">28%</text>
+          <text x="118" y="52" text-anchor="end" fill="#3b4256">1000人以上 (22)</text><rect x="126" y="40" width="108" height="15" rx="7" fill="#4c5ce0"/><text x="242" y="52" font-weight="700" fill="#4c5ce0">27%</text>
+          <text x="118" y="80" text-anchor="end" fill="#3b4256">51-200人 (87)</text><rect x="126" y="68" width="100" height="15" rx="7" fill="#8f9bff"/><text x="234" y="80" font-weight="700" fill="#8f9bff">25%</text>
+          <text x="118" y="108" text-anchor="end" fill="#3b4256">1-50人 (137)</text><rect x="126" y="96" width="80" height="15" rx="7" fill="#aeb6ff"/><text x="214" y="108" font-weight="700" fill="#aeb6ff">20%</text>
+        </g>
+        <text x="126" y="140" font-size="11.5" fill="#7a8095">平均总分：41.5 → 50.4 → 51.9 → 55.9（随规模递增）</text>
+        <text x="126" y="162" font-size="11.5" fill="#7a8095">SQL 率极差仅 8 个百分点，远小于岗位维度（49pct）</text>
+      </svg>
+      <div class="insight"><b>反直觉发现</b>：公司规模只抬分数、不决定成交 —— 评分模型中"规模"权重可下调 3~5 分，让给"岗位"。</div>
+    </div>
+  </div>
+
+  <!-- 图5 行为 -->
+  <div class="card">
+    <h2>⑤ 行为渗透率对比：高意向组（SQL+MQL） vs 无效组</h2>
+    <p class="desc">哪些行为真正"值钱"？深色 = 高意向组渗透率，灰色 = 无效组渗透率</p>
+    <svg viewBox="0 0 640 250" width="100%">
+      <g font-size="12.5">
+        <!-- scale pct*5.2 -->
+        <text x="128" y="24" text-anchor="end" fill="#3b4256">预约演示</text>
+        <rect x="136" y="10" width="99" height="13" rx="6" fill="#3b4bd8"/><text x="241" y="21" font-weight="700" fill="#3b4bd8">19%</text>
+        <rect x="136" y="26" width="4" height="13" rx="2" fill="#c9cdd9"/><text x="148" y="37" fill="#8a90a3">0%</text>
+        <text x="128" y="66" text-anchor="end" fill="#3b4256">试用注册</text>
+        <rect x="136" y="52" width="78" height="13" rx="6" fill="#3b4bd8"/><text x="220" y="63" font-weight="700" fill="#3b4bd8">15%</text>
+        <rect x="136" y="68" width="4" height="13" rx="2" fill="#c9cdd9"/><text x="148" y="79" fill="#8a90a3">0%</text>
+        <text x="128" y="108" text-anchor="end" fill="#3b4256">浏览价格页</text>
+        <rect x="136" y="94" width="47" height="13" rx="6" fill="#3b4bd8"/><text x="189" y="105" font-weight="700" fill="#3b4bd8">9%</text>
+        <rect x="136" y="110" width="4" height="13" rx="2" fill="#c9cdd9"/><text x="148" y="121" fill="#8a90a3">0%</text>
+        <text x="128" y="150" text-anchor="end" fill="#3b4256">观看演示视频</text>
+        <rect x="136" y="136" width="151" height="13" rx="6" fill="#5d6de8"/><text x="293" y="147" font-weight="700" fill="#5d6de8">29%</text>
+        <rect x="136" y="152" width="47" height="13" rx="6" fill="#c9cdd9"/><text x="189" y="163" fill="#8a90a3">9%</text>
+        <text x="128" y="192" text-anchor="end" fill="#3b4256">下载白皮书</text>
+        <rect x="136" y="178" width="203" height="13" rx="6" fill="#8f9bff"/><text x="345" y="189" font-weight="700" fill="#8f9bff">39%</text>
+        <rect x="136" y="194" width="135" height="13" rx="6" fill="#c9cdd9"/><text x="277" y="205" fill="#8a90a3">26%</text>
+        <text x="128" y="234" text-anchor="end" fill="#3b4256">官网多次访问</text>
+        <rect x="136" y="220" width="151" height="13" rx="6" fill="#8f9bff"/><text x="293" y="231" font-weight="700" fill="#8f9bff">29%</text>
+        <rect x="136" y="236" width="135" height="13" rx="6" fill="#c9cdd9"/><text x="277" y="247" fill="#8a90a3">26%</text>
+      </g>
+    </svg>
+    <div class="insight"><b>强信号</b>（无效组渗透率为 0）：预约演示、试用注册、浏览价格页 —— 应给高分甚至触发 SQL 直通规则。<b>弱信号</b>（两组差异小）：下载白皮书、官网多次访问 —— 人人都有，不该占高分，否则会"灌水"。</div>
+  </div>
+
+  <div class="grid2">
+    <!-- 图6 意图 -->
+    <div class="card">
+      <h2>⑥ 留言意图 × 平均总分</h2>
+      <p class="desc">括号内为该意图线索数量</p>
+      <svg viewBox="0 0 440 210" width="100%">
+        <g font-size="12">
+          <text x="92" y="24" text-anchor="end" fill="#3b4256">集成对接 (16)</text><rect x="100" y="12" width="258" height="15" rx="7" fill="#3b4bd8"/><text x="364" y="24" font-weight="700" fill="#3b4bd8">73.6</text>
+          <text x="92" y="54" text-anchor="end" fill="#3b4256">询价预算 (40)</text><rect x="100" y="42" width="223" height="15" rx="7" fill="#4c5ce0"/><text x="329" y="54" font-weight="700" fill="#4c5ce0">63.6</text>
+          <text x="92" y="84" text-anchor="end" fill="#3b4256">约演示 (31)</text><rect x="100" y="72" width="212" height="15" rx="7" fill="#5d6de8"/><text x="318" y="84" font-weight="700" fill="#5d6de8">60.4</text>
+          <text x="92" y="114" text-anchor="end" fill="#3b4256">案例咨询 (64)</text><rect x="100" y="102" width="159" height="15" rx="7" fill="#8f9bff"/><text x="265" y="114" font-weight="700" fill="#8f9bff">45.3</text>
+          <text x="92" y="144" text-anchor="end" fill="#3b4256">功能了解 (128)</text><rect x="100" y="132" width="148" height="15" rx="7" fill="#aeb6ff"/><text x="254" y="144" font-weight="700" fill="#aeb6ff">42.3</text>
+          <text x="92" y="174" text-anchor="end" fill="#3b4256">学生作业 (21)</text><rect x="100" y="162" width="34" height="15" rx="7" fill="#c9cdd9"/><text x="140" y="174" fill="#8a90a3" font-weight="700">9.7</text>
+        </g>
+      </svg>
+      <div class="insight">「集成对接」数量最少（16 条）但平均分最高 —— <b>留言一出现 API/对接字眼，基本就是 SQL 级信号</b>，值得单独设直通规则。</div>
+    </div>
+
+    <!-- 图7 渠道 -->
+    <div class="card">
+      <h2>⑦ 来源渠道 × SQL 率</h2>
+      <p class="desc">渠道质量差异明显，但需注意因果方向</p>
+      <svg viewBox="0 0 440 210" width="100%">
+        <g font-size="12">
+          <text x="116" y="24" text-anchor="end" fill="#3b4256">白皮书下载 (58)</text><rect x="124" y="12" width="144" height="15" rx="7" fill="#3b4bd8"/><text x="274" y="24" font-weight="700" fill="#3b4bd8">36%</text>
+          <text x="116" y="54" text-anchor="end" fill="#3b4256">销售自拓 (29)</text><rect x="124" y="42" width="96" height="15" rx="7" fill="#5d6de8"/><text x="226" y="54" font-weight="700" fill="#5d6de8">24%</text>
+          <text x="116" y="84" text-anchor="end" fill="#3b4256">社交媒体 (68)</text><rect x="124" y="72" width="84" height="15" rx="7" fill="#8f9bff"/><text x="214" y="84" font-weight="700" fill="#8f9bff">21%</text>
+          <text x="116" y="114" text-anchor="end" fill="#3b4256">官网表单 (73)</text><rect x="124" y="102" width="84" height="15" rx="7" fill="#8f9bff"/><text x="214" y="114" font-weight="700" fill="#8f9bff">21%</text>
+          <text x="116" y="144" text-anchor="end" fill="#3b4256">老客户推荐 (34)</text><rect x="124" y="132" width="72" height="15" rx="7" fill="#aeb6ff"/><text x="202" y="144" fill="#aeb6ff" font-weight="700">18%</text>
+          <text x="116" y="174" text-anchor="end" fill="#3b4256">直播/活动 (38)</text><rect x="124" y="162" width="72" height="15" rx="7" fill="#aeb6ff"/><text x="202" y="174" fill="#aeb6ff" font-weight="700">18%</text>
+        </g>
+      </svg>
+      <div class="insight">白皮书下载渠道 SQL 率 36% 领先 —— 但这是<b>筛选效应</b>（愿意下白皮书的人本来就更活跃）。落地页加"预约演示"入口可把这种兴趣接住。</div>
+    </div>
+  </div>
+
+  <!-- 结论 -->
+  <div class="card" style="background:#fbfcff">
+    <h2 style="margin-bottom:12px">📌 五条核心结论</h2>
+    <div class="card concl" style="margin-bottom:10px"><h3><span class="no">1</span>行业集中：金融 / 制造业 / 软件互联网贡献 80% 的 SQL</h3><p>三个行业样本占 51%、SQL 占 80%。销售资源应按此倾斜；教育、零售电商以 MQL 培育为主。</p></div>
+    <div class="card concl" style="margin-bottom:10px"><h3><span class="no">2</span>角色 &gt; 规模：岗位是最强属性信号</h3><p>采购/IT 负责人 SQL 率 40-49%，普通员工仅 12%；而公司规模对 SQL 率影响弱（极差 8pct）、只推高平均分。建议模型把"岗位"权重上调、"规模"权重下调。</p></div>
+    <div class="card concl" style="margin-bottom:10px"><h3><span class="no">3</span>行为分层：三个强信号、两个弱信号</h3><p>预约演示 / 试用注册 / 浏览价格页在无效组渗透率为 0（强信号）；下载白皮书、官网多次访问两组几乎无差异（弱信号），应降低其行为分权重。</p></div>
+    <div class="card concl" style="margin-bottom:10px"><h3><span class="no">4</span>意图即分层：留言关键词直接对应等级</h3><p>集成对接 73.6 分 &gt; 询价 63.6 &gt; 约演示 60.4 &gt; 功能了解 42.3。「API/对接」出现即接近 SQL 线，可设直通规则。</p></div>
+    <div class="card concl"><h3><span class="no">5</span>渠道：白皮书下载是当前最优获客渠道</h3><p>SQL 率 36% 领先其他渠道（18-24%）。建议加大内容营销，并在白皮书落地页加"预约演示"入口承接兴趣。</p></div>
+  </div>
+
+  <div class="quote">
+    <h2>🎤 面试一句话（可直接背）</h2>
+    <p>"我对 300 条商机数据做了六维度分层统计，最有价值的发现是'角色 &gt; 规模'：决策角色的 SQL 率是普通员工的 4 倍，而公司规模只推高平均分、几乎不影响转化。据此我建议把评分模型中岗位权重调高、规模权重调低，并把预约演示、询价、集成对接设为强意图直通信号 —— 用数据反哺评分模型迭代，这正是售前验证需求的核心闭环。"</p>
+  </div>
+
+  <div class="card">
+    <h2>📝 简历写法（对应加分项 1「数据分析」）</h2>
+    <p style="font-size:13.5px;color:#3b4256;margin-top:6px">对 300 条客户商机数据按行业 / 岗位 / 规模 / 行为 / 意图 / 渠道六维度做分层统计，定位高意向客户特征：决策角色 SQL 率为普通员工 4 倍、预约演示等强行为信号无效组渗透率为 0；据此反哺评分模型权重设计（岗位↑ 规模↓），输出分析报告支撑售前策略。</p>
+  </div>
+
+  <div class="foot">
+    <b>数据口径说明（面试被追问时用）：</b>
+    <li>数据为模拟数据集（seed=42 可复现），用于演示分析方法与口径设计；实际业务中官网留资线索的无效占比会显著更高（大量匿名访客不留资），本数据集均为已留资线索，故无效仅 11.3%。</li>
+    <li>评分口径与 AI CRM 线索助手工作流一致：属性分(45) + 行为分(25) + 意图分(30)，≥60 SQL / ≥30 MQL / &lt;30 无效。</li>
+    <li>SQL 率 23.3% 为"已留资+已分级"口径，与"官网 UV→SQL"口径不可直接对比。</li>
+    <li>配套文件：商机数据集_模拟300条.xlsx（明细）、商机数据生成与统计.py（可复现脚本）。</li>
+  </div>
+
+</div>
+</body>
+</html>

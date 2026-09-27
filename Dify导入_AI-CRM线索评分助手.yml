@@ -1,0 +1,630 @@
+app:
+  description: AI CRM 线索评分助手（POC）：客户留言 + 属性/行为数据 → LLM 结构化提取与意图识别 → 规则评分 → SQL/MQL/无效自动分流，SQL 生成跟进建议、MQL 生成培育方案。
+  icon: "\U0001F9ED"
+  icon_background: '#E0F2FE'
+  mode: workflow
+  name: AI CRM 线索评分助手
+  use_icon_as_answer_icon: false
+kind: app
+version: 0.1.5
+workflow:
+  conversation_variables: []
+  environment_variables: []
+  features: {}
+  graph:
+    edges:
+    - data:
+        sourceType: start
+        targetType: llm
+      id: e1
+      source: start
+      sourceHandle: source
+      target: extract
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        sourceType: llm
+        targetType: code
+      id: e2
+      source: extract
+      sourceHandle: source
+      target: rules
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        sourceType: code
+        targetType: llm
+      id: e3
+      source: rules
+      sourceHandle: source
+      target: intent_llm
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        sourceType: llm
+        targetType: code
+      id: e4
+      source: intent_llm
+      sourceHandle: source
+      target: parse_intent
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        sourceType: code
+        targetType: code
+      id: e5
+      source: parse_intent
+      sourceHandle: source
+      target: total
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        sourceType: code
+        targetType: if-else
+      id: e6
+      source: total
+      sourceHandle: source
+      target: branch
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        sourceType: if-else
+        targetType: llm
+      id: e7
+      source: branch
+      sourceHandle: 'true'
+      target: retrieve
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        sourceType: knowledge-retrieval
+        targetType: llm
+      id: e12
+      source: retrieve
+      sourceHandle: source
+      target: advice
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        sourceType: llm
+        targetType: end
+      id: e8
+      source: advice
+      sourceHandle: source
+      target: end_sql
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        sourceType: if-else
+        targetType: llm
+      id: e9
+      source: branch
+      sourceHandle: case_2
+      target: nurture
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        sourceType: llm
+        targetType: end
+      id: e10
+      source: nurture
+      sourceHandle: source
+      target: end_mql
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        sourceType: if-else
+        targetType: end
+      id: e11
+      source: branch
+      sourceHandle: 'false'
+      target: end_invalid
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    nodes:
+    - data:
+        desc: 线索接入：留言原文 + 静态属性 + 行为记录
+        selected: false
+        title: 开始
+        type: start
+        variables:
+        - label: 公司名称
+          max_length: 64
+          options: []
+          required: false
+          type: text-input
+          variable: company
+        - label: 客户原始留言
+          max_length: 2000
+          options: []
+          required: true
+          type: paragraph
+          variable: lead_raw
+        - label: 行业
+          max_length: 48
+          options:
+          - 软件/互联网
+          - 制造业
+          - 金融
+          - 医疗
+          - 教育
+          - 其他
+          - 学生个人
+          required: true
+          type: select
+          variable: industry
+        - label: 公司规模
+          max_length: 48
+          options:
+          - 500人以上
+          - 100-499人
+          - 20-99人
+          - 1-19人
+          - 个人/无
+          required: true
+          type: select
+          variable: company_size
+        - label: 岗位
+          max_length: 48
+          options:
+          - IT负责人/技术总监
+          - 采购/商务负责人
+          - 销售/市场负责人
+          - 普通员工
+          - 学生
+          required: true
+          type: select
+          variable: job_title
+        - label: 近期行为（顿号分隔，可留空）
+          max_length: 200
+          options: []
+          required: false
+          type: paragraph
+          variable: behaviors
+      height: 134
+      id: start
+      position:
+        x: 60
+        y: 300
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 244
+    - data:
+        context:
+          enabled: false
+          variable_selector: []
+        desc: 把非结构化留言提取成标准字段
+        model:
+          completion_params:
+            temperature: 0.2
+          mode: chat
+          name: gpt-4o-mini
+          provider: langgenius/openai/openai
+        prompt_template:
+        - id: sys_extract
+          role: system
+          text: |-
+            你是 CRM 线索清洗助手。从客户原始留言中提取结构化信息，仅输出 JSON，不要输出任何其他内容。
+            输出格式：{"need_summary": "客户核心诉求一句话不超过30字", "need_keywords": ["关键词最多5个"], "contact": "联系方式或null"}
+            规则：
+            1. 只依据留言原文提取，禁止编造。
+            2. 数字、产品名保持原样。
+        - id: usr_extract
+          role: user
+          text: '客户留言：{{#start.lead_raw#}}'
+        selected: false
+        title: 结构化提取
+        type: llm
+        variables: []
+        vision:
+          enabled: false
+      height: 90
+      id: extract
+      position:
+        x: 360
+        y: 300
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 244
+    - data:
+        code: "def main(industry: str, company_size: str, job_title: str, behaviors_raw: str) -> dict:\n    import re\n    industry_score = {'软件/互联网': 15, '制造业': 10, '金融': 12, '医疗': 10, '教育': 5, '学生个人': -20}\n    size_score = {'500人以上': 15, '100-499人': 12, '20-99人': 8, '1-19人': 5, '个人/无': -5}\n    title_score = {'IT负责人/技术总监': 15, '采购/商务负责人': 12, '销售/市场负责人': 8, '普通员工': 3, '学生': 0}\n    behav_score = {'下载白皮书': 8, '观看演示视频': 12, '访问集成对接页': 10, '打开报价邮件': 15, '一周内多次访问官网': 10, '预约产品演示': 15}\n\n    def pick(d, k, default):\n        try:\n            return d.get(k, default)\n        except Exception:\n            return default\n\n    i = pick(industry_score, industry, 3)\n    s = pick(size_score, company_size, 3)\n    j = pick(title_score, job_title, 3)\n    attr = max(0, min(45, i + s + j))\n    attr_detail = '行业[{}]: {:+d}；规模[{}]: {:+d}；岗位[{}]: {:+d}'.format(industry, i, company_size, s, job_title, j)\n\n    tokens = re.split(r'[、,，;；/\\s]+', behaviors_raw or '')\n    behav = 0\n    parts = []\n    for t in tokens:\n        t = t.strip()\n        if t and t in behav_score:\n            behav += behav_score[t]\n            parts.append('{}: +{}'.format(t, behav_score[t]))\n    behav = min(25, behav)\n    behav_detail = '；'.join(parts) if parts else '无行为记录'\n    return {'attribute_score': attr, 'attribute_detail': attr_detail, 'behavior_score': behav, 'behavior_detail': behav_detail}\n"
+        code_language: python3
+        desc: 属性分 + 行为分，规则精准可控
+        outputs:
+          attribute_detail:
+            children: null
+            type: string
+          attribute_score:
+            children: null
+            type: number
+          behavior_detail:
+            children: null
+            type: string
+          behavior_score:
+            children: null
+            type: number
+        selected: false
+        title: 规则评分器
+        type: code
+        variables:
+        - value_selector:
+          - start
+          - industry
+          variable: industry
+        - value_selector:
+          - start
+          - company_size
+          variable: company_size
+        - value_selector:
+          - start
+          - job_title
+          variable: job_title
+        - value_selector:
+          - start
+          - behaviors
+          variable: behaviors_raw
+      height: 90
+      id: rules
+      position:
+        x: 660
+        y: 300
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 244
+    - data:
+        context:
+          enabled: false
+          variable_selector: []
+        desc: 大模型识别留言背后的意向强度
+        model:
+          completion_params:
+            temperature: 0.2
+          mode: chat
+          name: gpt-4o-mini
+          provider: langgenius/openai/openai
+        prompt_template:
+        - id: sys_intent
+          role: system
+          text: |-
+            你是 CRM 线索意向识别助手。阅读客户原始留言，从资深销售视角判断意向强度，仅输出 JSON。
+            输出格式：{"intent_score": 0到30的整数, "intent_tag": "集成需求/价格咨询/演示试用/技术咨询/一般了解/随便看看 之一", "reason": "评分理由一句话"}
+            评分标准：
+            - 提到与现有系统集成、嵌入、API/iframe 对接：25-30
+            - 主动问报价、价格、费用：22-28
+            - 想预约演示、申请试用：18-24
+            - 询问功能细节、实现方式：10-16
+            - 泛泛了解、随便看看：0-6
+            - 其他一般咨询：7-12
+        - id: usr_intent
+          role: user
+          text: '客户留言：{{#start.lead_raw#}}'
+        selected: false
+        title: 意图评分
+        type: llm
+        variables: []
+        vision:
+          enabled: false
+      height: 90
+      id: intent_llm
+      position:
+        x: 960
+        y: 300
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 244
+    - data:
+        code: "import json, re\n\ndef main(llm_text: str) -> dict:\n    text = (llm_text or '').strip()\n    score, tag, reason = 8, '一般了解', '未解析出JSON，按一般咨询兜底'\n    m = re.search(r'\\{.*\\}', text, re.S)\n    if m:\n        try:\n            obj = json.loads(m.group(0))\n            score = int(obj.get('intent_score', 8))\n            tag = str(obj.get('intent_tag', '一般了解'))\n            reason = str(obj.get('reason', ''))[:80]\n        except Exception:\n            pass\n    score = max(0, min(30, score))\n    return {'intent_score': score, 'intent_tag': tag, 'reason': reason}\n"
+        code_language: python3
+        desc: 解析 LLM 输出，解析失败自动兜底
+        outputs:
+          intent_score:
+            children: null
+            type: number
+          intent_tag:
+            children: null
+            type: string
+          reason:
+            children: null
+            type: string
+        selected: false
+        title: 意图结果解析
+        type: code
+        variables:
+        - value_selector:
+          - intent_llm
+          - text
+          variable: llm_text
+      height: 90
+      id: parse_intent
+      position:
+        x: 1260
+        y: 300
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 244
+    - data:
+        code: "def main(attribute_score: float, behavior_score: float, intent_score: float) -> dict:\n    total = int(round((attribute_score or 0) + (behavior_score or 0) + (intent_score or 0)))\n    if total >= 60:\n        grade = 'SQL'\n    elif total >= 30:\n        grade = 'MQL'\n    else:\n        grade = 'INVALID'\n    return {'total_score': total, 'grade': grade}\n"
+        code_language: python3
+        desc: 三维合分，60/30 阈值分级
+        outputs:
+          grade:
+            children: null
+            type: string
+          total_score:
+            children: null
+            type: number
+        selected: false
+        title: 总分汇总
+        type: code
+        variables:
+        - value_selector:
+          - rules
+          - attribute_score
+          variable: attribute_score
+        - value_selector:
+          - rules
+          - behavior_score
+          variable: behavior_score
+        - value_selector:
+          - parse_intent
+          - intent_score
+          variable: intent_score
+      height: 90
+      id: total
+      position:
+        x: 1560
+        y: 300
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 244
+    - data:
+        cases:
+        - case_id: 'true'
+          conditions:
+          - comparison_operator: "\u2265"
+            id: c_sql
+            value: '60'
+            varType: number
+            variable_selector:
+            - total
+            - total_score
+          id: 'true'
+          logical_operator: and
+        - case_id: case_2
+          conditions:
+          - comparison_operator: "\u2265"
+            id: c_mql
+            value: '30'
+            varType: number
+            variable_selector:
+            - total
+            - total_score
+          id: case_2
+          logical_operator: and
+        desc: SQL≥60 / MQL≥30 / 无效
+        selected: false
+        title: 分级分流
+        type: if-else
+      height: 126
+      id: branch
+      position:
+        x: 1860
+        y: 300
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 244
+    - data:
+        dataset_ids: []
+        desc: 检索 CRM 产品知识库（导入后绑定你的知识库）
+        multiple_retrieval_config:
+          reranking_enable: false
+          score_threshold: null
+          top_k: 3
+        query_variable_selector:
+        - start
+        - lead_raw
+        retrieval_mode: multiple
+        selected: false
+        title: 产品知识检索
+        type: knowledge-retrieval
+      height: 90
+      id: retrieve
+      position:
+        x: 2160
+        y: 140
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 244
+    - data:
+        context:
+          enabled: true
+          variable_selector:
+          - retrieve
+          - result
+        desc: SQL 线索自动生成销售跟进建议
+        model:
+          completion_params:
+            temperature: 0.4
+          mode: chat
+          name: gpt-4o-mini
+          provider: langgenius/openai/openai
+        prompt_template:
+        - id: sys_advice
+          role: system
+          text: |-
+            你是资深 CRM 售前顾问。根据线索信息与下方知识库资料输出销售跟进建议，要求具体、可执行、必须回应客户留言中的原始诉求，禁止空话。
+            若客户问到产品能力，优先依据知识库资料回答；资料未覆盖的功能点，明确写"需与产品团队确认"，禁止编造。
+            直接输出建议正文，分四段，每段以小标题开头：客户痛点 / 核心需求 / 沟通重点 / 开场话术（80字以内，口语化）。
+        - id: usr_advice
+          role: user
+          text: |-
+            客户：{{#start.company#}}（{{#start.industry#}}，{{#start.company_size#}}，{{#start.job_title#}}）
+            留言：{{#start.lead_raw#}}
+            核心诉求：{{#extract.text#}}
+            意图标签：{{#parse_intent.intent_tag#}}（{{#parse_intent.reason#}}）
+            属性明细：{{#rules.attribute_detail#}}
+            行为明细：{{#rules.behavior_detail#}}
+        selected: false
+        title: 跟进建议生成
+        type: llm
+        variables: []
+        vision:
+          enabled: false
+      height: 90
+      id: advice
+      position:
+        x: 2460
+        y: 140
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 244
+    - data:
+        desc: ''
+        outputs:
+        - value_selector:
+          - total
+          - total_score
+          variable: total_score
+        - value_selector:
+          - total
+          - grade
+          variable: grade
+        - value_selector:
+          - parse_intent
+          - intent_tag
+          variable: intent_tag
+        - value_selector:
+          - advice
+          - text
+          variable: followup_advice
+        selected: false
+        title: 结束(SQL)
+        type: end
+      height: 90
+      id: end_sql
+      position:
+        x: 2460
+        y: 140
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 244
+    - data:
+        context:
+          enabled: false
+          variable_selector: []
+        desc: MQL 线索自动生成培育触达方案
+        model:
+          completion_params:
+            temperature: 0.5
+          mode: chat
+          name: gpt-4o-mini
+          provider: langgenius/openai/openai
+        prompt_template:
+        - id: sys_nurture
+          role: system
+          text: |-
+            你是 CRM 内容运营助手。根据低意向线索信息生成一条培育触达方案，输出正文，分三行：
+            推荐资料（行业案例/白皮书/落地视频 之一）
+            触达文案（60字以内，亲切专业，不硬推销）
+            下次触达建议（时间 + 内容）
+        - id: usr_nurture
+          role: user
+          text: |-
+            客户：{{#start.company#}}（{{#start.industry#}}）
+            核心诉求：{{#extract.text#}}
+            意图：{{#parse_intent.intent_tag#}}
+        selected: false
+        title: 培育内容生成
+        type: llm
+        variables: []
+        vision:
+          enabled: false
+      height: 90
+      id: nurture
+      position:
+        x: 2160
+        y: 380
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 244
+    - data:
+        desc: ''
+        outputs:
+        - value_selector:
+          - total
+          - total_score
+          variable: total_score
+        - value_selector:
+          - total
+          - grade
+          variable: grade
+        - value_selector:
+          - nurture
+          - text
+          variable: nurture_plan
+        selected: false
+        title: 结束(MQL)
+        type: end
+      height: 90
+      id: end_mql
+      position:
+        x: 2460
+        y: 380
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 244
+    - data:
+        desc: ''
+        outputs:
+        - value_selector:
+          - total
+          - total_score
+          variable: total_score
+        - value_selector:
+          - total
+          - grade
+          variable: grade
+        - value_selector:
+          - parse_intent
+          - reason
+          variable: filter_reason
+        selected: false
+        title: 结束(无效过滤)
+        type: end
+      height: 90
+      id: end_invalid
+      position:
+        x: 2160
+        y: 580
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 244
+    viewport:
+      x: 0
+      y: 0
+      zoom: 0.5

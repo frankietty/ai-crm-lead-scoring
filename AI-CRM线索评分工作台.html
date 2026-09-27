@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI CRM 线索评分工作台 · POC Demo</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, "PingFang SC", "Microsoft YaHei", "Segoe UI", sans-serif;
+    background: #f5f7fa; color: #1f2329; font-size: 14px; line-height: 1.6;
+  }
+  header {
+    background: #ffffff; border-bottom: 1px solid #e5e6eb;
+    padding: 14px 28px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;
+  }
+  .brand { font-size: 17px; font-weight: 600; color: #1d2129; display: flex; align-items: center; gap: 10px; }
+  .brand .logo {
+    width: 30px; height: 30px; border-radius: 8px; background: #185fa5;
+    color: #fff; display: inline-flex; align-items: center; justify-content: center; font-size: 15px;
+  }
+  .head-note { font-size: 12px; color: #86909c; }
+  .head-note b { color: #185fa5; font-weight: 500; }
+
+  .layout {
+    display: grid; grid-template-columns: 340px 1fr 1fr;
+    gap: 16px; padding: 16px 28px; max-width: 1440px; margin: 0 auto; align-items: start;
+  }
+  @media (max-width: 1100px) { .layout { grid-template-columns: 1fr; } }
+
+  .panel {
+    background: #fff; border: 1px solid #e5e6eb; border-radius: 12px; overflow: hidden;
+  }
+  .panel-h {
+    padding: 12px 16px; border-bottom: 1px solid #f0f1f3;
+    font-weight: 600; font-size: 14px; display: flex; align-items: center; gap: 8px;
+  }
+  .step {
+    width: 20px; height: 20px; border-radius: 6px; font-size: 12px; color: #fff;
+    background: #185fa5; display: inline-flex; align-items: center; justify-content: center; flex: none;
+  }
+  .panel-b { padding: 16px; }
+  .field { margin-bottom: 12px; }
+  .field label { display: block; font-size: 12px; color: #4e5969; margin-bottom: 4px; }
+  .field select, .field input, .field textarea {
+    width: 100%; border: 1px solid #e5e6eb; border-radius: 8px; padding: 7px 10px;
+    font-size: 13px; color: #1f2329; background: #fff; outline: none; font-family: inherit;
+  }
+  .field select:focus, .field input:focus, .field textarea:focus { border-color: #185fa5; }
+  .field textarea { resize: vertical; min-height: 64px; }
+  .checks { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 10px; }
+  .checks label {
+    display: flex; align-items: center; gap: 6px; font-size: 12px; color: #1f2329;
+    margin: 0; cursor: pointer; font-weight: 400;
+  }
+  .checks input { width: auto; }
+
+  .preset-row { display: flex; gap: 8px; margin-bottom: 14px; flex-wrap: wrap; }
+  .preset {
+    border: 1px solid #c9d7ea; background: #eef4fb; color: #185fa5; font-size: 12px;
+    border-radius: 999px; padding: 4px 12px; cursor: pointer; font-family: inherit;
+  }
+  .preset:hover { background: #dce9f7; }
+  .btn-run {
+    width: 100%; border: none; background: #185fa5; color: #fff; font-size: 14px;
+    border-radius: 8px; padding: 10px; cursor: pointer; font-weight: 600; font-family: inherit;
+  }
+  .btn-run:hover { background: #134a83; }
+  .btn-run:disabled { background: #a9c3e0; cursor: not-allowed; }
+
+  .empty { color: #a9aeb8; font-size: 12.5px; text-align: center; padding: 28px 10px; }
+  .score-card { border: 1px solid #e5e6eb; border-radius: 10px; padding: 12px 14px; margin-bottom: 10px; }
+  .score-card .tt { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+  .score-card .name { font-weight: 600; font-size: 13px; }
+  .score-card .val { font-weight: 600; font-size: 13px; color: #185fa5; }
+  .detail { font-size: 12px; color: #6b7486; }
+  .detail div { display: flex; justify-content: space-between; padding: 2px 0; }
+  .detail .plus { color: #2e8a4d; }
+  .detail .minus { color: #c0392b; }
+  .tag {
+    display: inline-block; font-size: 11px; border-radius: 4px; padding: 1px 8px; margin-left: 6px;
+    background: #eef4fb; color: #185fa5; font-weight: 500;
+  }
+  .thinking { color: #86909c; font-size: 12.5px; }
+  .thinking::after { content: "…"; animation: dots 1.2s steps(4) infinite; }
+  @keyframes dots { 0% { content: ""; } 25% { content: "."; } 50% { content: ".."; } 75% { content: "..."; } }
+
+  .result-top { display: flex; align-items: center; gap: 18px; margin-bottom: 14px; }
+  .ring { width: 108px; height: 108px; flex: none; }
+  .ring text.val { font-size: 30px; font-weight: 600; fill: #1f2329; }
+  .ring text.cap { font-size: 11px; fill: #86909c; }
+  .grade-badge { font-size: 16px; font-weight: 600; padding: 4px 14px; border-radius: 8px; display: inline-block; margin-bottom: 6px; }
+  .grade-sql { background: #e6f6eb; color: #1e7a3c; border: 1px solid #b7e2c3; }
+  .grade-mql { background: #fdf3e3; color: #a15c0a; border: 1px solid #f3ddb0; }
+  .grade-invalid { background: #f2f3f5; color: #6b7486; border: 1px solid #e0e2e8; }
+  .grade-desc { font-size: 12px; color: #6b7486; }
+
+  .timeline { border-left: 2px solid #e5e6eb; margin: 6px 0 14px 6px; padding-left: 16px; }
+  .timeline .item { position: relative; font-size: 12.5px; color: #4e5969; padding: 4px 0; opacity: 0; transform: translateY(4px); transition: all .4s; }
+  .timeline .item.show { opacity: 1; transform: none; }
+  .timeline .item::before {
+    content: ""; position: absolute; left: -21.5px; top: 10px; width: 9px; height: 9px;
+    border-radius: 50%; background: #185fa5; border: 2px solid #fff; box-shadow: 0 0 0 1px #c9d7ea;
+  }
+  .script-box { background: #f7f9fc; border: 1px dashed #c9d7ea; border-radius: 10px; padding: 12px 14px; font-size: 12.5px; color: #2c3e50; display: none; }
+  .script-box.show { display: block; }
+  .script-box .cap { font-size: 11px; color: #86909c; margin-bottom: 4px; font-weight: 600; }
+
+  .pipeline {
+    max-width: 1440px; margin: 4px auto 20px; padding: 0 28px;
+    display: flex; align-items: center; gap: 0; flex-wrap: wrap;
+  }
+  .pnode {
+    display: flex; align-items: center; gap: 6px; font-size: 12px; color: #86909c;
+    background: #fff; border: 1px solid #e5e6eb; border-radius: 999px; padding: 5px 14px;
+  }
+  .pnode .dot { width: 8px; height: 8px; border-radius: 50%; background: #d4d7dd; }
+  .pnode.active { color: #185fa5; border-color: #185fa5; background: #eef4fb; font-weight: 600; }
+  .pnode.active .dot { background: #185fa5; }
+  .pnode.done { color: #1e7a3c; }
+  .pnode.done .dot { background: #2e8a4d; }
+  .parrow { color: #c9cdd4; margin: 0 6px; font-size: 12px; }
+
+  .foot-note { text-align: center; font-size: 11.5px; color: #a9aeb8; padding: 0 20px 24px; }
+</style>
+</head>
+<body>
+<header>
+  <div class="brand"><span class="logo">AI</span>AI CRM 线索评分工作台</div>
+  <div class="head-note">AI 售前 POC Demo · 浏览器内置<b>模拟 LLM 评分引擎</b> · 生产版由 Coze / Dify 工作流驱动（搭建包见同目录文档）</div>
+</header>
+
+<main class="layout">
+  <!-- ① 线索接入 -->
+  <section class="panel">
+    <div class="panel-h"><span class="step">1</span>线索接入</div>
+    <div class="panel-b">
+      <div class="preset-row">
+        <button class="preset" onclick="loadPreset(0)">示例 · SQL 高意向</button>
+        <button class="preset" onclick="loadPreset(1)">示例 · MQL 培育</button>
+        <button class="preset" onclick="loadPreset(2)">示例 · 无效线索</button>
+      </div>
+      <div class="field"><label>公司 / 姓名</label><input id="f_company" placeholder="如：苏州智造设备有限公司"></div>
+      <div class="field"><label>行业</label>
+        <select id="f_industry">
+          <option value="">请选择</option>
+          <option>软件/互联网</option><option>制造业</option><option>金融</option>
+          <option>医疗</option><option>教育</option><option>其他</option><option>学生个人</option>
+        </select>
+      </div>
+      <div class="field"><label>公司规模</label>
+        <select id="f_size">
+          <option value="">请选择</option>
+          <option>500人以上</option><option>100-499人</option><option>20-99人</option>
+          <option>1-19人</option><option>个人/无</option>
+        </select>
+      </div>
+      <div class="field"><label>岗位</label>
+        <select id="f_job">
+          <option value="">请选择</option>
+          <option>IT负责人/技术总监</option><option>采购/商务负责人</option>
+          <option>销售/市场负责人</option><option>普通员工</option><option>学生</option>
+        </select>
+      </div>
+      <div class="field"><label>近期行为（多选）</label>
+        <div class="checks" id="f_behaviors">
+          <label><input type="checkbox" value="下载白皮书">下载白皮书</label>
+          <label><input type="checkbox" value="观看演示视频">观看演示视频</label>
+          <label><input type="checkbox" value="访问集成对接页">访问集成对接页</label>
+          <label><input type="checkbox" value="打开报价邮件">打开报价邮件</label>
+          <label><input type="checkbox" value="一周内多次访问官网">一周内多次访问官网</label>
+          <label><input type="checkbox" value="预约产品演示">预约产品演示</label>
+        </div>
+      </div>
+      <div class="field"><label>客户原始留言</label>
+        <textarea id="f_raw" placeholder="粘贴在线咨询 / 表单留言原文…"></textarea>
+      </div>
+      <button class="btn-run" id="btnRun" onclick="run()">开始 AI 评分</button>
+    </div>
+  </section>
+
+  <!-- ② AI 评分过程 -->
+  <section class="panel">
+    <div class="panel-h"><span class="step">2</span>AI 评分过程（模拟 LLM 推理）</div>
+    <div class="panel-b" id="scoreArea">
+      <div class="empty">提交线索后，这里将逐项展示<br>属性分 / 行为分 / 意图识别的打分明细</div>
+    </div>
+  </section>
+
+  <!-- ③ 分级与自动化动作 -->
+  <section class="panel">
+    <div class="panel-h"><span class="step">3</span>分级结果与自动化动作</div>
+    <div class="panel-b" id="resultArea">
+      <div class="empty">评分完成后，这里将展示<br>线索等级、系统自动化动作与 AI 跟进话术</div>
+    </div>
+  </section>
+</main>
+
+<div class="pipeline" id="pipeline">
+  <span class="pnode" data-n="0"><span class="dot"></span>线索接入</span><span class="parrow">→</span>
+  <span class="pnode" data-n="1"><span class="dot"></span>清洗结构化</span><span class="parrow">→</span>
+  <span class="pnode" data-n="2"><span class="dot"></span>AI 评分</span><span class="parrow">→</span>
+  <span class="pnode" data-n="3"><span class="dot"></span>分级分流</span><span class="parrow">→</span>
+  <span class="pnode" data-n="4"><span class="dot"></span>培育 / 分配</span><span class="parrow">→</span>
+  <span class="pnode" data-n="5"><span class="dot"></span>反馈沉淀</span>
+</div>
+
+<div class="foot-note">本页为高保真 POC 演示：评分规则与真实部署版一致，在浏览器本地模拟 LLM 推理，无任何数据上传 ｜ 搭建：秦斌然 × WorkBuddy · 2026-09</div>
+
+<script>
+const RULES = {
+  industry: { '软件/互联网': 15, '制造业': 10, '金融': 12, '医疗': 10, '教育': 5, '其他': 3, '学生个人': -20 },
+  size:     { '500人以上': 15, '100-499人': 12, '20-99人': 8, '1-19人': 5, '个人/无': -5 },
+  job:      { 'IT负责人/技术总监': 15, '采购/商务负责人': 12, '销售/市场负责人': 8, '普通员工': 3, '学生': 0 },
+  behavior: { '下载白皮书': 8, '观看演示视频': 12, '访问集成对接页': 10, '打开报价邮件': 15, '一周内多次访问官网': 10, '预约产品演示': 15 }
+};
+
+const PRESETS = [
+  { company: '苏州智造设备有限公司', industry: '制造业', size: '500人以上', job: 'IT负责人/技术总监',
+    behaviors: ['下载白皮书', '访问集成对接页', '打开报价邮件'],
+    raw: '我们公司有一套用了 5 年的旧 CRM，想把你们的 AI 线索评分能力嵌入进去。支持 iframe 嵌入和 API 对接吗？另外想约个时间看下演示。' },
+  { company: '杭州某电商科技公司', industry: '软件/互联网', size: '20-99人', job: '普通员工',
+    behaviors: ['下载白皮书', '一周内多次访问官网'],
+    raw: '先了解一下你们产品的功能，我们最近在调研 AI CRM 这块，后续可能会推荐给团队一起看看。' },
+  { company: '小李同学', industry: '学生个人', size: '个人/无', job: '学生',
+    behaviors: [],
+    raw: '随便看看，我是学生，写作业需要了解一下 CRM 是什么概念，没有别的意思。' }
+];
+
+function intentOf(raw) {
+  const t = raw || '';
+  if (/集成|嵌入|对接|API|iframe|接口|打通/.test(t))
+    return { score: 28, tag: '集成需求', reason: '留言明确提到与现有系统集成/嵌入，属于强采购信号，给高意图分' };
+  if (/报价|价格|多少钱|费用|收费/.test(t))
+    return { score: 25, tag: '价格咨询', reason: '主动询问价格与费用，采购进入实质阶段' };
+  if (/演示|试用|预约|看看产品|约个时间/.test(t))
+    return { score: 20, tag: '演示试用', reason: '有预约演示/试用意愿，意向中高' };
+  if (/功能|怎么用|实现|能不能/.test(t))
+    return { score: 13, tag: '技术咨询', reason: '关注功能细节，处于了解评估期' };
+  if (/学生|作业|随便|学习/.test(t))
+    return { score: 3, tag: '随便看看', reason: '无真实采购诉求，判定为低意向/无效' };
+  return { score: 8, tag: '一般了解', reason: '仅一般性了解，无明显采购信号' };
+}
+
+function gradeOf(total) {
+  if (total >= 60) return 'SQL';
+  if (total >= 30) return 'MQL';
+  return 'INVALID';
+}
+
+function ringSvg(total, grade) {
+  const color = grade === 'SQL' ? '#2e8a4d' : grade === 'MQL' ? '#d97b0d' : '#9aa1ac';
+  const pct = Math.max(0, Math.min(100, total));
+  const C = 2 * Math.PI * 46;
+  return '<svg class="ring" viewBox="0 0 108 108">' +
+    '<circle cx="54" cy="54" r="46" fill="none" stroke="#eef0f3" stroke-width="9"/>' +
+    '<circle cx="54" cy="54" r="46" fill="none" stroke="' + color + '" stroke-width="9" ' +
+      'stroke-linecap="round" stroke-dasharray="' + (C * pct / 100).toFixed(1) + ' ' + C.toFixed(1) + '" ' +
+      'transform="rotate(-90 54 54)"/>' +
+    '<text class="val" x="54" y="52" text-anchor="middle" dominant-baseline="central">' + total + '</text>' +
+    '<text class="cap" x="54" y="76" text-anchor="middle">综合评分</text></svg>';
+}
+
+function setPipe(activeIdx) {
+  document.querySelectorAll('#pipeline .pnode').forEach((el, i) => {
+    el.classList.toggle('done', i < activeIdx);
+    el.classList.toggle('active', i === activeIdx);
+  });
+}
+
+function resetPanels() {
+  document.getElementById('scoreArea').innerHTML = '<div class="thinking">AI 正在清洗与结构化线索</div>';
+  document.getElementById('resultArea').innerHTML = '<div class="thinking">等待评分完成</div>';
+}
+
+function renderAttrCard(d) {
+  return '<div class="score-card"><div class="tt"><span class="name">静态属性分 <span class="tag">规则引擎</span></span>' +
+    '<span class="val">' + d.attr + ' / 45</span></div><div class="detail">' + d.attrDetail + '</div></div>';
+}
+function renderBehCard(d) {
+  return '<div class="score-card"><div class="tt"><span class="name">动态行为分 <span class="tag">规则引擎</span></span>' +
+    '<span class="val">' + d.behav + ' / 25</span></div><div class="detail">' + d.behavDetail + '</div></div>';
+}
+function renderIntentCard(d) {
+  return '<div class="score-card"><div class="tt"><span class="name">意图识别分 <span class="tag">模拟 LLM</span></span>' +
+    '<span class="val">' + d.score + ' / 30</span></div>' +
+    '<div class="detail">标签：<b style="color:#185fa5">' + d.tag + '</b>　' + d.reason + '</div></div>';
+}
+
+function actionsAndScript(grade, data, intent) {
+  let items = [], scriptCap = '', script = '';
+  if (grade === 'SQL') {
+    items = [
+      '已标记为 <b>SQL · 销售合格线索</b>',
+      '已按「华东区 · 制造业」自动分配销售：张经理',
+      '跟进建议已推送至企业微信（含痛点与沟通重点）',
+      '线索已同步写入飞书多维表格线索库'
+    ];
+    scriptCap = 'AI 生成的开场话术';
+    script = data.opening;
+  } else if (grade === 'MQL') {
+    items = [
+      '已标记为 <b>MQL · 进入线索培育池</b>',
+      'D+1 自动推送行业落地案例（已排期）',
+      'D+7 自动推送客户成功视频（已排期）',
+      '行为分上涨至阈值后将自动升级为 SQL'
+    ];
+    scriptCap = 'AI 生成的培育触达文案';
+    script = data.opening;
+  } else {
+    items = [
+      '已判定为 <b>无效线索，直接过滤</b>，不占用销售人力',
+      '留言关键词已沉淀至线索漏斗看板',
+      '若后续行为分上涨，将自动重新评分'
+    ];
+    scriptCap = '';
+  }
+  let html = '<div class="result-top">' + ringSvg(data.total, grade) + '<div>' +
+    '<span class="grade-badge ' + (grade === 'SQL' ? 'grade-sql' : grade === 'MQL' ? 'grade-mql' : 'grade-invalid') + '">' +
+    (grade === 'SQL' ? 'SQL · 转销售跟进' : grade === 'MQL' ? 'MQL · 进入培育' : '无效 · 已过滤') +
+    '</span><div class="grade-desc">' +
+    (grade === 'SQL' ? '高意向：系统已自动完成分配与通知，销售可立即跟进'
+      : grade === 'MQL' ? '中低意向：暂不打扰，自动培育养意向'
+      : '低意向：过滤兜底，避免浪费销售人力') +
+    '</div></div></div><div class="timeline">' +
+    items.map(t => '<div class="item">' + t + '</div>').join('') + '</div>';
+  if (scriptCap) {
+    html += '<div class="script-box" id="scriptBox"><div class="cap">' + scriptCap + '</div>' + script + '</div>';
+  }
+  return html;
+}
+
+function collect() {
+  const behaviors = Array.from(document.querySelectorAll('#f_behaviors input:checked')).map(x => x.value);
+  return {
+    company: document.getElementById('f_company').value.trim() || '未命名线索',
+    industry: document.getElementById('f_industry').value,
+    size: document.getElementById('f_size').value,
+    job: document.getElementById('f_job').value,
+    behaviors,
+    raw: document.getElementById('f_raw').value.trim()
+  };
+}
+
+function loadPreset(i) {
+  const p = PRESETS[i];
+  document.getElementById('f_company').value = p.company;
+  document.getElementById('f_industry').value = p.industry;
+  document.getElementById('f_size').value = p.size;
+  document.getElementById('f_job').value = p.job;
+  document.querySelectorAll('#f_behaviors input').forEach(x => { x.checked = p.behaviors.includes(x.value); });
+  document.getElementById('f_raw').value = p.raw;
+}
+
+function openingScript(grade, lead, intent) {
+  if (grade === 'SQL') {
+    const focus = intent.tag === '集成需求' ? '重点回应「' + (lead.company) + '」关心的系统嵌入与 API 对接方案，可带技术顾问一起'
+      : intent.tag === '价格咨询' ? '直接给到报价区间与版本对比，顺势约演示'
+      : '围绕演示需求确认时间，会前发一页方案预告';
+    return '「' + lead.company + '您好，看到您在关注我们的 AI 线索评分能力。' +
+      '我们服务过多家同行业客户，' + focus + '。明天上午或下午方便约个 20 分钟演示吗？」';
+  }
+  if (grade === 'MQL') {
+    return '「' + lead.company + '您好，感谢关注～给您准备了一份同行业客户的 AI CRM 落地案例，' +
+      '3 分钟就能看完。如果有具体想解决的问题，随时回复这条消息，我帮您对接方案顾问。」';
+  }
+  return '';
+}
+
+let running = false;
+function run() {
+  if (running) return;
+  const lead = collect();
+  if (!lead.industry || !lead.size || !lead.job) { alert('请先选择行业、规模、岗位（或直接点一个示例按钮）'); return; }
+  running = true;
+  const btn = document.getElementById('btnRun');
+  btn.disabled = true; btn.textContent = 'AI 评分中…';
+  setPipe(0);
+  resetPanels();
+
+  const iR = RULES.industry[lead.industry] ?? 3;
+  const sR = RULES.size[lead.size] ?? 3;
+  const jR = RULES.job[lead.job] ?? 3;
+  let attr = Math.max(0, Math.min(45, iR + sR + jR));
+  const attrDetail =
+    '<div><span>行业 · ' + lead.industry + '</span><span class="' + (iR < 0 ? 'minus' : 'plus') + '">' + (iR >= 0 ? '+' : '') + iR + '</span></div>' +
+    '<div><span>规模 · ' + lead.size + '</span><span class="' + (sR < 0 ? 'minus' : 'plus') + '">' + (sR >= 0 ? '+' : '') + sR + '</span></div>' +
+    '<div><span>岗位 · ' + lead.job + '</span><span class="' + (jR < 0 ? 'minus' : 'plus') + '">' + (jR >= 0 ? '+' : '') + jR + '</span></div>';
+
+  let behav = 0;
+  const behavRows = lead.behaviors.length
+    ? lead.behaviors.map(b => { const v = RULES.behavior[b] || 0; behav += v; return '<div><span>' + b + '</span><span class="plus">+' + v + '</span></div>'; }).join('')
+    : '<div><span>暂无行为记录</span><span>+0</span></div>';
+  behav = Math.min(25, behav);
+
+  const intent = intentOf(lead.raw);
+  const total = attr + behav + intent.score;
+  const grade = gradeOf(total);
+
+  const data = {
+    total, attr, attrDetail, behav, behavDetail: behavRows,
+    opening: openingScript(grade, lead, intent)
+  };
+
+  setTimeout(() => setPipe(1), 300);
+
+  setTimeout(() => {
+    document.getElementById('scoreArea').innerHTML = renderAttrCard(data);
+    setPipe(2);
+  }, 900);
+
+  setTimeout(() => {
+    document.getElementById('scoreArea').innerHTML = renderAttrCard(data) + renderBehCard(data);
+  }, 1600);
+
+  setTimeout(() => {
+    document.getElementById('scoreArea').innerHTML =
+      renderAttrCard(data) + renderBehCard(data) + renderIntentCard(intent);
+  }, 2400);
+
+  setTimeout(() => {
+    document.getElementById('resultArea').innerHTML = actionsAndScript(grade, data, intent);
+    setPipe(grade === 'INVALID' ? 4 : 5);
+    const items = document.querySelectorAll('#resultArea .timeline .item');
+    items.forEach((el, i) => setTimeout(() => el.classList.add('show'), 250 * (i + 1)));
+    const sb = document.getElementById('scriptBox');
+    if (sb) setTimeout(() => sb.classList.add('show'), 250 * (items.length + 1));
+  }, 3100);
+
+  setTimeout(() => {
+    btn.disabled = false; btn.textContent = '开始 AI 评分';
+    running = false;
+  }, 3300);
+}
+</script>
+</body>
+</html>
