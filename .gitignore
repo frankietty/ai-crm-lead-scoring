@@ -1,9 +1,20 @@
 # Python
 __pycache__/
 *.pyc
+.venv/
 
 # Office 锁文件 / 系统文件
 ~$*.xlsx
 ~$*.docx
 .DS_Store
 Thumbs.db
+
+# 构建与测试中间产物
+*.ref/
+.ref/
+*.tmp
+*.log
+
+# 本地环境配置（切勿提交任何密钥）
+.env
+*.local

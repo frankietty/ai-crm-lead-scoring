@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI 工作流测试用例手册 · 大白话版（AI-CRM 线索评分助手实战）</title>
+<style>
+:root{
+  --ink:#1f2328; --muted:#5b6572; --hint:#8b949e;
+  --line:#e5e7eb; --line2:#d0d7de;
+  --bg:#ffffff; --bg2:#f6f8fa; --bg3:#fbfcfd;
+  --blue:#185FA5; --blue-bg:#E6F1FB; --blue-ink:#0C447C;
+  --teal:#0F6E56; --teal-bg:#E1F5EE; --teal-ink:#085041;
+  --amber:#854F0B; --amber-bg:#FAEEDA; --amber-ink:#633806;
+  --purple:#534AB7; --purple-bg:#EEEDFE; --purple-ink:#26215C;
+  --red:#A32D2D; --red-bg:#FCEBEB;
+  --gray:#5F5E5A; --gray-bg:#F1EFE8;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
+  font-size:15px;line-height:1.78;-webkit-font-smoothing:antialiased}
+.wrap{max-width:940px;margin:0 auto;padding:48px 28px 96px}
+h1{font-size:27px;font-weight:600;margin:0 0 8px;letter-spacing:-.3px}
+h2{font-size:20px;font-weight:600;margin:54px 0 16px;padding-bottom:10px;border-bottom:1px solid var(--line)}
+h3{font-size:16.5px;font-weight:600;margin:30px 0 10px}
+h4{font-size:15px;font-weight:600;margin:18px 0 6px}
+p{margin:0 0 12px}
+.sub{color:var(--muted);font-size:14px;margin:0 0 4px}
+.meta{color:var(--hint);font-size:13px;margin:0 0 28px}
+ul,ol{margin:0 0 14px;padding-left:22px}
+li{margin:5px 0}
+code{font-family:"SFMono-Regular",Consolas,"Courier New",monospace;font-size:13px;
+  background:var(--bg2);border:1px solid var(--line);border-radius:4px;padding:1px 5px;color:var(--blue-ink)}
+b,strong{font-weight:600}
+
+.hero{background:var(--bg3);border:1px solid var(--line);border-left:3px solid var(--blue);
+  border-radius:10px;padding:20px 24px;margin:0 0 30px}
+.hero .lead{font-size:17px;font-weight:600;margin:0 0 10px;color:var(--blue-ink)}
+.hero p:last-child{margin:0}
+
+.story{background:var(--purple-bg);border-radius:10px;padding:18px 22px;margin:16px 0 20px}
+.story .tag{font-size:11.5px;font-weight:600;color:var(--purple);letter-spacing:.4px;display:block;margin-bottom:8px}
+.story p{color:var(--purple-ink);margin:0 0 10px}
+.story p:last-child{margin:0}
+
+table{width:100%;border-collapse:collapse;margin:14px 0 22px;font-size:13.5px}
+th{background:var(--bg2);text-align:left;font-weight:600;font-size:12.5px;color:var(--muted);
+  padding:9px 11px;border-bottom:1px solid var(--line2)}
+td{padding:9px 11px;border-bottom:1px solid var(--line);vertical-align:top;line-height:1.65}
+tr:last-child td{border-bottom:none}
+td code{font-size:12px}
+
+.chip{display:inline-block;font-size:11.5px;line-height:1.7;padding:0 8px;border-radius:20px;
+  border:1px solid;white-space:nowrap;font-weight:500}
+.c-blue{background:var(--blue-bg);color:var(--blue-ink);border-color:#B5D4F4}
+.c-teal{background:var(--teal-bg);color:var(--teal-ink);border-color:#9FE1CB}
+.c-amber{background:var(--amber-bg);color:var(--amber-ink);border-color:#FAC775}
+.c-gray{background:var(--gray-bg);color:var(--gray);border-color:#D3D1C7}
+.c-red{background:var(--red-bg);color:var(--red);border-color:#F7C1C1}
+
+.card{border:1px solid var(--line);border-radius:10px;padding:16px 20px;margin:14px 0;background:var(--bg)}
+.card .t{font-weight:600;margin:0 0 6px;font-size:15px}
+.card p:last-child{margin-bottom:0}
+
+.grid3{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin:16px 0 22px}
+.tile{border:1px solid var(--line);border-radius:10px;padding:14px 16px;background:var(--bg)}
+.tile .lab{font-size:11.5px;font-weight:600;margin-bottom:6px}
+.tile .hd{font-size:14.5px;font-weight:600;margin-bottom:6px}
+.tile .bd{font-size:13px;color:var(--muted);line-height:1.65}
+.tile .ex{font-size:12.5px;color:var(--hint);line-height:1.6;margin-top:10px;padding-top:10px;border-top:1px solid var(--line)}
+
+.step{display:flex;gap:14px;margin:0 0 14px;align-items:flex-start}
+.step .n{flex:none;width:26px;height:26px;border-radius:50%;background:var(--blue-bg);color:var(--blue-ink);
+  font-size:13px;font-weight:600;display:flex;align-items:center;justify-content:center;margin-top:2px}
+.step .c{flex:1}
+.step .c .t{font-weight:600;margin:0 0 2px}
+.step .c p{margin:0;color:var(--muted);font-size:14px}
+
+.warn{background:#FFF8F0;border:1px solid #F5D9B8;border-radius:10px;padding:16px 20px;margin:16px 0}
+.warn h4{color:var(--amber-ink);margin-top:0}
+.good{background:#F2FBF8;border:1px solid #B7E4D5;border-radius:10px;padding:16px 20px;margin:16px 0}
+.good h4{color:var(--teal-ink);margin-top:0}
+.warn p:last-child,.good p:last-child,.warn ul:last-child,.good ul:last-child{margin-bottom:0}
+
+.qa{border-top:1px solid var(--line);padding:16px 0}
+.qa:last-of-type{border-bottom:1px solid var(--line)}
+.qa .q{font-weight:600;margin:0 0 6px;display:flex;gap:8px}
+.qa .q .qn{color:var(--blue);font-family:"SFMono-Regular",Consolas,monospace;font-size:13px;flex:none}
+.qa .a{margin:0;color:var(--muted);font-size:14px}
+.qa .a b{color:var(--ink)}
+
+.copy{border-left:3px solid var(--purple);background:var(--purple-bg);border-radius:0 8px 8px 0;
+  padding:14px 18px;margin:14px 0}
+.copy .tag{font-size:11.5px;color:var(--purple);font-weight:600;letter-spacing:.4px;display:block;margin-bottom:6px}
+.copy p{margin:0 0 8px;color:var(--purple-ink)}
+.copy p:last-child{margin:0}
+
+.check{list-style:none;padding:0;margin:14px 0}
+.check li{padding:9px 0 9px 32px;position:relative;border-bottom:1px solid var(--line);font-size:14.5px}
+.check li:before{content:"";position:absolute;left:4px;top:15px;width:13px;height:13px;
+  border:1.5px solid var(--line2);border-radius:3px}
+
+footer{margin-top:60px;padding-top:20px;border-top:1px solid var(--line);color:var(--hint);font-size:13px}
+@media print{body{font-size:11.5pt}.wrap{max-width:none;padding:0}h2{page-break-after:avoid}tr,.card{page-break-inside:avoid}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<h1>AI 工作流测试用例手册 · 大白话版</h1>
+<p class="sub">怎么写用例 / 怎么测 / 测出问题怎么改 —— 全程用「AI-CRM 线索评分助手」做例子</p>
+<p class="meta">依据：<code>Dify导入_AI-CRM线索评分助手.yml</code> 真实评分规则推算预期值 ｜ 18 条即用用例 ｜ 2026-09-28</p>
+
+<div class="hero">
+  <p class="lead">先把一句话记住</p>
+  <p>传统代码是"钥匙配锁"—— 插进去能开就是对的，测一次就够。<strong>AI 工作流是"老中医开方"</strong>—— 同一个病人今天和明天开的方子可能不一样。所以给 AI 写测试，不能测"对不对"，只能测"<strong>在不在合理范围内</strong>"。</p>
+</div>
+
+<h2 id="s1">一、为什么 AI 项目必须写用例（三个理由，都很现实）</h2>
+
+<div class="story">
+<span class="tag">打个比方</span>
+<p>AI 工作流像一个刚入职的实习生。你花了半天教他规矩（写提示词），但他有几个特点：<strong>记性看运气</strong>（模型有随机性）、<strong>心情影响输出</strong>（温度参数）、<strong>偶尔自作主张</strong>（幻觉）。</p>
+<p>怎么知道他能不能上岗？<strong>给他 20 道题，看对了多少道。</strong>这 20 道题就是测试用例 —— 而且这 20 道题以后每次你改动他（改提示词、换模型、调权重）都要重考一遍，看他有没有变笨。</p>
+</div>
+
+<table>
+<thead><tr><th style="width:150px">理由</th><th>大白话解释</th><th style="width:230px">不用例会怎样</th></tr></thead>
+<tbody>
+<tr><td><b>① 上线有门槛</b></td><td>你得有个客观标准说"这版能用了"。不然"我觉得差不多了"是说服不了客户和自己的。</td><td>上线后靠运气，客户第一条测试就翻车。</td></tr>
+<tr><td><b>② 改动不退化</b></td><td>你今天为了修 A 问题改了提示词，很可能把原来好的 B 弄坏了 —— 除非你把所有用例重跑一遍。</td><td>越改越差，修一个漏三个，最后不敢动。</td></tr>
+<tr><td><b>③ 演示有保底</b></td><td>客户现场演示最怕翻车。用例就是你的"安全牌堆"—— 提前跑过 20 遍的输入，现场必稳。</td><td>现场演示撞上模型抽风，尴尬到无法收场。</td></tr>
+</tbody>
+</table>
+
+<h2 id="s2">二、一条用例的五个要素（照这个模板抄）</h2>
+
+<p>很多人写用例只写"输入"和"简单期望"，所以判卷时只能靠感觉。一条合格的用例必须有这五样：</p>
+
+<table>
+<thead><tr><th style="width:110px">要素</th><th style="width:200px">要求</th><th>以你的项目举例</th></tr></thead>
+<tbody>
+<tr><td><b>① 用例编号</b></td><td>唯一、有规律（含层次）</td><td><code>TC-01</code>（正常）、<code>TC-07</code>（边界）、<code>TC-13</code>（异常）</td></tr>
+<tr><td><b>② 输入</b></td><td>6 个字段全部写具体值，不含糊</td><td>制造业 / 500 人以上 / IT 负责人 / 打开报价邮件、访问集成对接页 / 留言"旧 CRM 想嵌 AI 评分，支持 API 对接吗？"</td></tr>
+<tr><td><b>③ 预期结果</b></td><td><b>必须可判定</b>：等级 + 分数区间 + 关键内容都要给</td><td>等级 <code>SQL</code>；总分 <code>85-95</code>；意图标签 <code>集成需求</code>；话术必须出现"API"或"集成"</td></tr>
+<tr><td><b>④ 判定标准</b></td><td>什么算通过、什么算失败，写死</td><td>等级一致 <b>且</b> 分数在区间内 <b>且</b> 话术含关键词 → 通过；任一项不满足 → 失败</td></tr>
+<tr><td><b>⑤ 设计理由</b></td><td>这条在测什么能力（面试也爱问）</td><td>验证"集成/API"这条最高档意图评分有没有真的生效</td></tr>
+</tbody>
+</table>
+
+<div class="warn">
+<h4>最容易犯的错：预期结果写"分数合理""话术质量好"</h4>
+<p>这种写法的用例等于没写 —— 判卷时你说不清算不算过。<b>正确做法：把"合理"翻译成数字和关键词。</b>比如"话术质量好"→"话术必须包含客户留言里的原词，且四段小标题齐全，且不出现'需与产品团队确认'（因为该问题知识库里有答案）"。</p>
+<p><b>为什么不能要求分数一模一样？</b>因为大模型有波动。判卷要像判作文 —— 不能要求一字不差，但可以要求"论点齐全、不跑题、字数达标"。分数线就用<b>区间</b>表示。</p>
+</div>
+
+<h2 id="s3">三、用例要分三层（只写第一层的人，一上线就出事）</h2>
+
+<div class="grid3">
+  <div class="tile" style="border-top:3px solid var(--teal)">
+    <div class="lab" style="color:var(--teal)">第一层 · 正常用例</div>
+    <div class="hd">证明"能用"</div>
+    <div class="bd">每种结果至少 2 条：SQL、MQL、无效各来两条。这是地基。</div>
+    <div class="ex">例：IT 负责人问"支持 API 对接吗" → 必须判 SQL</div>
+  </div>
+  <div class="tile" style="border-top:3px solid var(--blue)">
+    <div class="lab" style="color:var(--blue)">第二层 · 边界用例</div>
+    <div class="hd">证明"分得准"</div>
+    <div class="bd">专门造卡在 60 / 30 分数线上的线索，看会不会判错级、封顶有没有失效。</div>
+    <div class="ex">例：总分 59 和 61 的两条 → 必须落在不同等级</div>
+  </div>
+  <div class="tile" style="border-top:3px solid var(--red)">
+    <div class="lab" style="color:var(--red)">第三层 · 异常用例</div>
+    <div class="hd">证明"崩不了"</div>
+    <div class="bd">空留言、超长留言、行为全空、模型返回乱码、中英混杂。</div>
+    <div class="ex">例：留言只写"你好" → 流程必须走完、不许报错</div>
+  </div>
+</div>
+
+<div class="good">
+<h4>为什么边界用例最重要？</h4>
+<p>因为 <b>bug 都藏在"差一点"的地方</b>。一条 90 分的线索被判成 SQL，谁都不会觉得有问题；但一条刚好 60 分的线索，会因为意图分模型多给 1 分就跨级 —— 而客户最关心的恰恰是这条线划得准不准（"为什么这条你说值得跟？"）。<b>正常用例是及格线，边界用例才是区分度。</b></p>
+</div>
+
+<h2 id="s4">四、怎么测：6 步操作（在 Dify 里手的动作）</h2>
+
+<div class="step"><div class="n">1</div><div class="c"><p class="t">先跑三条预置用例，确认链路是通的</p><p>SQL（≥60）/ MQL（30-59）/ 无效（&lt;30）各一条。这一步只是验证"没接错线、模型都绑好了"，别急着看分数准不准。</p></div></div>
+
+<div class="step"><div class="n">2</div><div class="c"><p class="t">单节点测：出问题时定位到具体节点</p><p>Dify 里每个节点都可以单独运行。把上一步的真实输出粘进去，单独跑 <code>intent_llm</code> 或 <code>rules</code>，看它自己这一环对不对 —— <b>能单点定位，才不会一改就全乱</b>。</p></div></div>
+
+<div class="step"><div class="n">3</div><div class="c"><p class="t">整条流跑：从输入到结束看完整输出</p><p>输入 6 个字段，等结果。重点看四个值：<code>total_score</code>、<code>grade</code>、<code>intent_tag</code>、以及中间节点暴露的 <code>attribute_detail</code> / <code>behavior_detail</code>（你的规则节点很给力，明细直接能看）。</p></div></div>
+
+<div class="step"><div class="n">4</div><div class="c"><p class="t">逐条填记录表：算通过率</p><p>把每条用例的<b>实际输出</b>填进《测试记录表》，通过率 = 通过条数 ÷ 总条数。18 条里必须全过才算这版可用（关键用例 TC-01、TC-05 一条都不许错）。</p></div></div>
+
+<div class="step"><div class="n">5</div><div class="c"><p class="t">抖动测试：同一条跑 3 次，看波动</p><p>这是 AI 项目特有的。同一条用例连跑 3 遍，如果总分差超过 ±5 分，说明温度太高或提示词档位不够清晰 —— 这一步能提前发现"客户现场重跑一次结果变了"的尴尬。</p></div></div>
+
+<div class="step"><div class="n">6</div><div class="c"><p class="t">每次改动后回归：把 18 条全部重跑</p><p>改完提示词、权重、阈值、模型，都要重跑一遍并和上次的结果对比。<b>这是防止"改一个坏一个"的唯一办法。</b></p></div></div>
+
+<h3>通过标准（可以直接写进验收文档）</h3>
+<table>
+<thead><tr><th style="width:210px">指标</th><th style="width:150px">标准</th><th>为什么这么定</th></tr></thead>
+<tbody>
+<tr><td>等级判定一致率</td><td>≥ 80%（AI vs 人工双盲）</td><td>POC 期最实用的指标 —— 销售认不认可比数学上的准确率更重要</td></tr>
+<tr><td>关键用例通过率</td><td>TC-01（SQL）、TC-05（无效）100%</td><td>这两类是业务命门：漏掉高价值客户 / 放行垃圾线索，代价最大</td></tr>
+<tr><td>分数抖动</td><td>同一条跑 3 次，极差 ≤ ±5 分</td><td>分数飘忽销售就不信，可解释性直接崩掉</td></tr>
+<tr><td>兜底命中率</td><td>≤ 5%</td><td>兜底太多说明提示词约束不够，或模型能力不足</td></tr>
+<tr><td>单条处理耗时</td><td>≤ 30 秒</td><td>对齐你案例文档里的验收标准（30 秒内完成打分）</td></tr>
+<tr><td>数值边界不越界</td><td>属性分 0-45、行为分 0-25、意图分 0-30</td><td>防止封顶 / 夹紧逻辑失效导致总分爆表</td></tr>
+</tbody>
+</table>
+
+<h2 id="s5">五、测出来不对怎么办：先归因，再动手</h2>
+
+<p>新手最常见的错误是：<b>结果不对 → 直接改提示词 → 结果还是不对 → 再改 → 越改越乱。</b>正确顺序是往上游找，"错在哪一环"先定下来。</p>
+
+<div class="card">
+<p class="t">等级判错了？按这四条路查（从上往下，从代码到模型）</p>
+<ol style="margin-bottom:0">
+<li><b>属性分不对 → 查代码，别查模型。</b>用户能选的选项和 <code>rules</code> 里的字典键是否<b>逐字一致</b>？比如选项是"学生个人"、字典键是"学生个人"（这条你写对了）；但如果哪次改成"学生"，就会走默认值，分数全变。<b>这一层是纯代码问题，改代码 5 秒钟解决，改提示词一辈子也解决不了。</b></li>
+<li><b>行为分是 0 → 行为词没命中字典。</b>客户填"预约演示"，字典里写的是"预约产品演示" → 切词后匹配不上，直接计 0。这就是为什么我在用例里专门放了一条 <code>TC-11</code> 去<b>故意触发</b>这个不匹配 —— 这类问题不测永远发现不了。</li>
+<li><b>意图分忽高忽低 → 先看提取，再收档位。</b>先确认 <code>extract</code> 有没有把诉求提取对（提取错了，评分再准也没用）；然后收紧提示词里的六档评分标准（写得更细、每档给一个例句），并把温度压到 0.2。</li>
+<li><b>走了兜底 8 分 → 模型没按 JSON 格式返回。</b>在提示词里补一个"标准输出示例"（让模型照抄格式），同时给兜底加一个标记字段 <code>is_fallback</code>，方便统计命中率 —— 不然它静默兜底你永远不知道。</li>
+</ol>
+</div>
+
+<div class="story">
+<span class="tag">再打个比方</span>
+<p>调 AI 工作流像医生调药：<strong>一次只动一味药</strong>。你同时改了提示词、又调了权重、又换了模型，结果变好了 —— 你不知道是哪一味起了作用，下次再出问题你就抓瞎了。</p>
+<p>所以纪律是：<strong>一次只改一个变量 → 重跑全部用例 → 记录结果</strong>。改对了就留下，改错了就退回去。这样每一步都有据可查，面试时你还能讲出"我是怎么一步步把准确率从 60% 调到 85% 的"—— 这比说"我调了调提示词"强一百倍。</p>
+</div>
+
+<h3>优化动作清单（对症下药）</h3>
+<table>
+<thead><tr><th style="width:180px">症状</th><th style="width:230px">可能原因</th><th>对应动作</th></tr></thead>
+<tbody>
+<tr><td>分数普遍偏低 / 高意向被判 MQL</td><td>阈值定得太保守，或缺行为数据</td><td>先用真实成交样本回测改阈值；确认客户能否提供行为字段（缺行为分就只有 75 分的上限）</td></tr>
+<tr><td>同一条线索分数每次不一样</td><td>温度太高 / 提示词档位模糊</td><td>温度降到 0.2；给每一档补一个例句（few-shot），让档位边界不重叠</td></tr>
+<tr><td>话术答非所问</td><td>检索没取到对的资料</td><td>检查知识库分段是否太碎、开 rerank、把查询词从留言原文换成"提取后的关键词"试试</td></tr>
+<tr><td>话术编造产品功能</td><td>提示词约束不够</td><td>强化"资料未覆盖的写'需与产品团队确认'"；补充知识库覆盖该话题</td></tr>
+<tr><td>经常走兜底</td><td>提示词没给输出格式示例</td><td>提示词里贴一个标准 JSON 示例；或换支持结构化输出（JSON Schema）的模型</td></tr>
+<tr><td>提取出的 JSON 塞不进下游</td><td>下游引用的是 <code>extract.text</code>（整段 JSON 字符串）</td><td>加一个解析节点取出 <code>need_summary</code> 再往下传（这条我已写进通关手册的待改点 2）</td></tr>
+<tr><td>无效线索也花了钱</td><td>分支位置太靠后</td><td>把可前置的规则判断提前（注意：提取和意图评分这两次调用无法避免，因为没有它们就判断不出等级）</td></tr>
+</tbody>
+</table>
+
+<h2 id="s6">六、18 条即用用例（预期分数已按你的真实规则算好）</h2>
+<p>下面是完整的用例集。<b>预期总分区间是按 DSL 里的评分表推算的</b>：属性分（行业 + 规模 + 岗位，封顶 45）+ 行为分（封顶 25）+ 意图分（0-30）。可以直接抄进 Dify 逐条跑。</p>
+
+<h3>第一层：正常用例（TC-01 ~ TC-06）</h3>
+<table>
+<thead><tr><th style="width:56px">编号</th><th style="width:250px">输入（行业 / 规模 / 岗位 / 行为 / 留言）</th><th style="width:190px">预期结果</th><th>这条在测什么</th></tr></thead>
+<tbody>
+<tr><td><b>TC-01</b></td><td>制造业 / 500人以上 / IT负责人 / 打开报价邮件、访问集成对接页 / "我们旧 CRM 想嵌 AI 评分，支持 API 对接吗？"</td><td><span class="chip c-teal">SQL</span> 总分 <b>85-95</b><br>标签：集成需求<br>话术必须出现"API"或"集成"</td><td>最高档意图（集成需求）是否真的生效；高分线索的 RAG 检索与话术生成是否跑通</td></tr>
+<tr><td><b>TC-02</b></td><td>软件/互联网 / 100-499人 / 采购负责人 / 预约产品演示 / "想约个演示，顺便问下报价"</td><td><span class="chip c-teal">SQL</span> 总分 <b>70-85</b><br>标签：价格咨询 / 演示试用</td><td>询价与约演示两类中高意图的识别；多个意图并存时取最高档</td></tr>
+<tr><td><b>TC-03</b></td><td>金融 / 20-99人 / 普通员工 / 下载白皮书 / "想了解一下你们的产品功能"</td><td><span class="chip c-amber">MQL</span> 总分 <b>38-50</b><br>标签：技术咨询 / 一般了解</td><td>弱画像 + 弱行为的组合是否被正确判为培育池，不越级成 SQL</td></tr>
+<tr><td><b>TC-04</b></td><td>教育 / 20-99人 / 销售市场负责人 / 下载白皮书 / "看看有没有合适的方案，先了解下"</td><td><span class="chip c-amber">MQL</span> 总分 <b>33-45</b><br>出口：<code>nurture_plan</code> 有内容</td><td>MQL 支线的培育方案生成是否正常（三个要素齐全：推荐资料 / 触达文案 / 下次触达）</td></tr>
+<tr><td><b>TC-05</b></td><td>学生个人 / 个人无 / 学生 / 空 / "写作业需要了解 CRM"</td><td><span class="chip c-gray">无效</span> 总分 <b>0-5</b><br>出口：<code>filter_reason</code> 有内容</td><td><b>关键用例</b>：负分行业 + 负分规模是否被正确夹紧到 0，且不进任何检索 / 话术生成</td></tr>
+<tr><td><b>TC-06</b></td><td>其他 / 1-19人 / 普通员工 / 空 / "随便看看"</td><td><span class="chip c-gray">无效</span> 总分 <b>8-20</b></td><td>不在字典里的行业值（"其他"）走默认分是否正常，不报错</td></tr>
+</tbody>
+</table>
+
+<h3>第二层：边界用例（TC-07 ~ TC-12）</h3>
+<table>
+<thead><tr><th style="width:56px">编号</th><th style="width:250px">输入</th><th style="width:190px">预期结果</th><th>这条在测什么</th></tr></thead>
+<tbody>
+<tr><td><b>TC-07</b></td><td>制造业 / 100-499人 / IT负责人 / 下载白皮书 / "想了解下功能细节"</td><td>总分应落在 <b>55-65</b>，等级 SQL 或 MQL 均可<br><b>但必须记录实际值</b></td><td>正好卡在 60 分线上的线索 —— 这是暴露"阈值该不该调"的地方，跑 3 次看等级会不会跳变</td></tr>
+<tr><td><b>TC-08</b></td><td>A 组留言"想了解下功能" vs B 组留言"支持 API 对接吗"<br>（其余 5 个字段完全相同）</td><td>B 的总分比 A 高 <b>≥10 分</b>；若 A 是 MQL，B 必须升为 SQL</td><td><b>最有价值的一条</b>：只换一句留言，检验意图分的区分度。区分度不够，说明意图节点形同虚设</td></tr>
+<tr><td><b>TC-09</b></td><td>行为填满 6 项：预约产品演示、打开报价邮件、观看演示视频、访问集成对接页、下载白皮书、一周内多次访问官网（原始相加 = 70）</td><td><code>behavior_score</code> 必须 <b>= 25</b>（不是 70）<br>总分 ≤ 100</td><td>行为分封顶是否生效。不测这条，总分可能算出个 140 分</td></tr>
+<tr><td><b>TC-10</b></td><td>两组：① 软件/互联网+500人以上+IT负责人（相加 45）② 学生个人+个人/无+学生（相加 -25）</td><td>① <code>attribute_score</code> = <b>45</b><br>② <code>attribute_score</code> = <b>0</b>（不能是 -25）</td><td>属性分双向夹紧：上限 45、下限 0。负数流进总分会把漏斗彻底搞乱</td></tr>
+<tr><td><b>TC-11</b></td><td>行为填"<b>预约演示</b>"（字典里写的是"预约产品演示"）</td><td><code>behavior_score</code> = <b>0</b><br>且应记为待修复的配置问题</td><td><b>负向测试</b>：故意用一个不匹配的词，验证字典键与实际输入的差异。这类问题不主动测，永远发现不了</td></tr>
+<tr><td><b>TC-12</b></td><td>学生个人 / 1-19人 / 学生 / 空 / "老师让我们调研一下 CRM 产品"</td><td><span class="chip c-gray">无效</span>，<code>attribute_score</code> = 0<br>意图分应 &lt; 5</td><td>验证"学生"类线索能被稳定拦住，不会被"调研"这种听起来正经的词骗到高分</td></tr>
+</tbody>
+</table>
+
+<h3>第三层：异常用例（TC-13 ~ TC-18）</h3>
+<table>
+<thead><tr><th style="width:56px">编号</th><th style="width:250px">输入</th><th style="width:190px">预期结果</th><th>这条在测什么</th></tr></thead>
+<tbody>
+<tr><td><b>TC-13</b></td><td>留言留空，其余字段正常</td><td>应被<b>入参校验拦下</b>（<code>lead_raw</code> 是必填），不进入流程</td><td>输入校验层是否生效 —— 挡在最前面的防线</td></tr>
+<tr><td><b>TC-14</b></td><td>留言 = "。。。" 或 "你好"</td><td>流程走完不报错；总分 &lt; 30（无效）；<code>reason</code> 有内容</td><td>无意义输入不会让链路崩溃，也不会被判成高意向</td></tr>
+<tr><td><b>TC-15</b></td><td>留言 = 2000 字长文本（直接贴到上限）</td><td>流程走完不报错；<code>need_summary</code> ≤ 30 字；记录耗时是否仍 ≤ 30 秒</td><td>长度上限的表现 + 提取节点是否会被长文本带偏</td></tr>
+<tr><td><b>TC-16</b></td><td>留言 = "我们暂时没预算，但想问下支持 API 对接吗，另外报价多少"</td><td>标签 ∈ {集成需求, 价格咨询}，<b>不能是"随便看看"</b></td><td>多种意图混杂时是否取最高档。"没预算"这种干扰词不该把分数拉低</td></tr>
+<tr><td><b>TC-17</b></td><td>人为制造模型返回非 JSON（临时改提示词要求它"用一段话回答"再跑）</td><td>兜底生效：<code>intent_score = 8</code>、标签"一般了解"、<b>流程不中断</b></td><td><b>验证"安全气囊"</b>。这条用例是 POC 现场不翻车的底气，也证明你真的懂工程健壮性</td></tr>
+<tr><td><b>TC-18</b></td><td>留言 = "Do you support API integration? 我们想接入我们自己的系统"</td><td>标签 = 集成需求；总分应落在 SQL 或接近线</td><td>中英混杂是否能正确识别，不因英文而误判为无效</td></tr>
+</tbody>
+</table>
+
+<h2 id="s7">七、面试怎么讲这套测试方法（三句话版本）</h2>
+
+<div class="copy">
+<span class="tag">被问到"你怎么验证这个 AI 工作流是对的"</span>
+<p>"我写了 18 条用例，分三层。第一层正常用例，SQL、MQL、无效各两条，保证基本能力；第二层边界用例，专门造卡在 60 分和 30 分线上的线索，还有验证封顶逻辑的极端输入 —— 因为 bug 都藏在差一点的地方；第三层异常用例，空留言、2000 字长文本、模型返回乱码，验证流程不会崩。"</p>
+<p>"另外因为 AI 有随机性，我不测'分数完全一致'，而是测'等级一致 + 分数在区间 + 关键内容命中'。同一条线索连跑 3 次，极差要在 ±5 分以内。"</p>
+<p>"最有用的是 <b>TC-11</b>，我故意填了一个字典里没有的行为词，结果行为分算成 0 —— 一下就暴露出输入选项和代码字典可能不一致的风险。这类问题是靠设计用例主动挖出来的，不测永远发现不了。"</p>
+</div>
+
+<div class="copy">
+<span class="tag">被问到"测出问题你怎么改"</span>
+<p>"我先归因再动手，不直接改提示词。因为分数 = 属性分 + 行为分 + 意图分，哪一段不对就查那一段的源头：属性分和行为分不对，一定是代码字典和输入枚举对不上，改代码；意图分不稳，先看提取对不对，再收紧评分档位、压温度；如果走了兜底，是模型没按 JSON 输出，我就在提示词里补一个标准输出示例。"</p>
+<p>"而且我改的时候<b>一次只动一个变量</b>，改完把 18 条用例全部重跑，跟上一版结果对比 —— 这样才知道是哪一处改动起了作用，也能防止修一个坏一个。"</p>
+</div>
+
+<div class="copy">
+<span class="tag">被问到"这套东西上线要看什么指标"</span>
+<p>"POC 阶段看等级一致率，AI 分级和资深销售双盲对比，≥80% 才允许上线；另外两条硬指标是分数抖动 ≤±5 分、兜底命中率 ≤5%。上线之后真正看的是 SQL 线索的成交转化率有没有提升。"</p>
+</div>
+
+<h2 id="s8">八、动手前的自测清单</h2>
+<ul class="check">
+<li>能说出为什么 AI 项目不能像传统代码那样"测一次就够"</li>
+<li>能背出一条用例的五个要素（编号 / 输入 / 预期 / 判定标准 / 设计理由）</li>
+<li>能解释为什么预期结果要写成"区间 + 等级 + 关键内容"而不是一个精确分数</li>
+<li>能说清三层用例各自证明什么，以及为什么边界用例最重要</li>
+<li>能说出同一条线索跑 3 次、极差要控制在多少（±5 分）</li>
+<li>知道去 Dify 哪里单节点运行、哪里看中间节点的明细输出</li>
+<li>能背出归因顺序：先属性分和行为分（查代码），再意图分（查提示词），最后兜底（查格式）</li>
+<li>能解释"一次只改一个变量"的道理，并说得出你自己踩过的例子</li>
+<li>能说出至少两个数值边界（属性分 0-45、行为分 0-25）并知道为什么要测</li>
+<li>能当场说出 TC-11 这条用例的设计意图（故意制造字典不匹配）</li>
+<li>能说出通过标准里的两条硬指标（一致率 ≥80%、抖动 ≤±5 分）</li>
+<li>18 条用例里，能挑出你认为最重要的 3 条并说明理由</li>
+</ul>
+
+<div class="good">
+<h4>最后一句</h4>
+<p>测试用例这件事，本质不是"证明我的系统没问题"，而是<b>"在客户发现之前，自己先发现问题"</b>。你把 18 条用例跑通、把两个失败案例的归因过程讲出来，面试官听到的就不是"我做了个 AI 项目"，而是"这个人知道怎么把 AI 项目做扎实"—— 这两句话在评估表上不是一个档次。</p>
+</div>
+
+<footer>
+AI 工作流测试用例手册 · 大白话版 ｜ 配套《工作流通关手册_AI-CRM线索评分助手.html》 ｜ 2026-09-28<br>
+配套文件：测试用例集_AI-CRM线索评分助手.xlsx（18 条用例 + 记录表 + 通过标准 + 优化动作清单）
+</footer>
+
+</div>
+</body>
+</html>

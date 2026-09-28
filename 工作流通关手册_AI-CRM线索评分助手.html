@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI-CRM 线索评分助手 · 工作流通关手册</title>
+<style>
+:root{
+  --ink:#1f2328; --muted:#5b6572; --hint:#8b949e;
+  --line:#e5e7eb; --line2:#d0d7de;
+  --bg:#ffffff; --bg2:#f6f8fa; --bg3:#fbfcfd;
+  --blue:#185FA5; --blue-bg:#E6F1FB; --blue-ink:#0C447C;
+  --teal:#0F6E56; --teal-bg:#E1F5EE; --teal-ink:#085041;
+  --amber:#854F0B; --amber-bg:#FAEEDA; --amber-ink:#633806;
+  --purple:#534AB7; --purple-bg:#EEEDFE; --purple-ink:#26215C;
+  --red:#A32D2D; --red-bg:#FCEBEB;
+  --gray:#5F5E5A; --gray-bg:#F1EFE8;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
+  font-size:15px;line-height:1.75;-webkit-font-smoothing:antialiased}
+.wrap{max-width:920px;margin:0 auto;padding:48px 28px 96px}
+h1{font-size:28px;font-weight:600;margin:0 0 8px;letter-spacing:-.3px}
+h2{font-size:20px;font-weight:600;margin:56px 0 16px;padding-bottom:10px;border-bottom:1px solid var(--line)}
+h3{font-size:16px;font-weight:600;margin:28px 0 10px}
+h4{font-size:15px;font-weight:600;margin:18px 0 6px}
+p{margin:0 0 12px}
+.sub{color:var(--muted);font-size:14px;margin:0 0 4px}
+.meta{color:var(--hint);font-size:13px;margin:0 0 28px}
+ul,ol{margin:0 0 14px;padding-left:22px}
+li{margin:5px 0}
+code{font-family:"SFMono-Regular",Consolas,"Courier New",monospace;font-size:13px;
+  background:var(--bg2);border:1px solid var(--line);border-radius:4px;padding:1px 5px;color:var(--blue-ink)}
+.hr{height:1px;background:var(--line);margin:40px 0}
+
+.hero{background:var(--bg3);border:1px solid var(--line);border-left:3px solid var(--blue);
+  border-radius:10px;padding:20px 24px;margin:0 0 32px}
+.hero .lead{font-size:17px;font-weight:500;margin:0 0 10px;color:var(--blue-ink)}
+.hero p:last-child{margin:0}
+
+.metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin:20px 0 8px}
+.metric{background:var(--bg2);border-radius:8px;padding:14px 16px}
+.metric .k{font-size:12px;color:var(--muted);margin-bottom:2px}
+.metric .v{font-size:22px;font-weight:600;letter-spacing:-.5px}
+.metric .v small{font-size:12px;font-weight:400;color:var(--muted);letter-spacing:0}
+
+table{width:100%;border-collapse:collapse;margin:14px 0 20px;font-size:14px}
+th{background:var(--bg2);text-align:left;font-weight:600;font-size:13px;color:var(--muted);
+  padding:10px 12px;border-bottom:1px solid var(--line2)}
+td{padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+tr:last-child td{border-bottom:none}
+td code{font-size:12.5px}
+
+.chip{display:inline-block;font-size:11.5px;line-height:1.6;padding:1px 8px;border-radius:20px;
+  border:1px solid;white-space:nowrap;font-weight:500}
+.c-blue{background:var(--blue-bg);color:var(--blue-ink);border-color:#B5D4F4}
+.c-purple{background:var(--purple-bg);color:var(--purple-ink);border-color:#CECBF6}
+.c-teal{background:var(--teal-bg);color:var(--teal-ink);border-color:#9FE1CB}
+.c-amber{background:var(--amber-bg);color:var(--amber-ink);border-color:#FAC775}
+.c-gray{background:var(--gray-bg);color:var(--gray);border-color:#D3D1C7}
+.c-red{background:var(--red-bg);color:var(--red);border-color:#F7C1C1}
+
+.node{border:1px solid var(--line);border-radius:10px;padding:16px 18px;margin:0 0 12px;background:var(--bg)}
+.node .head{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:6px}
+.node .head .no{font-family:"SFMono-Regular",Consolas,monospace;font-size:12px;color:var(--hint);
+  min-width:20px}
+.node .head .nm{font-size:15.5px;font-weight:600}
+.node .head .id{font-family:"SFMono-Regular",Consolas,monospace;font-size:12.5px;color:var(--muted);
+  background:var(--bg2);border-radius:4px;padding:1px 6px}
+.node .what{color:var(--ink);margin:0 0 8px}
+.node .facts{margin:0;padding:0;list-style:none;font-size:13.5px}
+.node .facts li{margin:3px 0;padding-left:56px;position:relative;color:var(--muted)}
+.node .facts li b{position:absolute;left:0;color:var(--ink);font-weight:500}
+.node .why{margin:8px 0 0;font-size:13.5px;color:var(--teal-ink);background:var(--teal-bg);
+  border-radius:6px;padding:8px 12px}
+
+.box{border:1px solid var(--line);border-radius:10px;padding:16px 20px;margin:16px 0;background:var(--bg3)}
+.box.warn{background:#FFF8F0;border-color:#F5D9B8}
+.box.warn h4{color:var(--amber-ink);margin-top:0}
+.box.good{background:#F2FBF8;border-color:#B7E4D5}
+.box.good h4{color:var(--teal-ink);margin-top:0}
+.box h4:first-child{margin-top:0}
+.box p:last-child,.box ul:last-child,.box ol:last-child{margin-bottom:0}
+
+.qa{border-top:1px solid var(--line);padding:16px 0}
+.qa:last-of-type{border-bottom:1px solid var(--line)}
+.qa .q{font-weight:600;margin:0 0 6px;display:flex;gap:8px}
+.qa .q .qn{color:var(--blue);font-family:"SFMono-Regular",Consolas,monospace;font-size:13px;flex:none}
+.qa .a{margin:0;color:var(--muted);font-size:14px}
+.qa .a b{color:var(--ink);font-weight:600}
+.qa .a code{font-size:12.5px}
+
+.copy{border-left:3px solid var(--purple);background:var(--purple-bg);border-radius:0 8px 8px 0;
+  padding:14px 18px;margin:14px 0}
+.copy .tag{font-size:11.5px;color:var(--purple);font-weight:600;letter-spacing:.4px;display:block;margin-bottom:6px}
+.copy p{margin:0 0 8px;color:var(--purple-ink)}
+.copy p:last-child{margin:0}
+
+.check{list-style:none;padding:0;margin:14px 0}
+.check li{padding:9px 0 9px 32px;position:relative;border-bottom:1px solid var(--line);font-size:14.5px}
+.check li:before{content:"";position:absolute;left:4px;top:15px;width:13px;height:13px;
+  border:1.5px solid var(--line2);border-radius:3px}
+.toc{background:var(--bg2);border-radius:10px;padding:16px 22px;margin:0 0 8px;font-size:14px}
+.toc ol{margin:0;padding-left:20px}
+.toc a{color:var(--blue);text-decoration:none}
+.toc a:hover{text-decoration:underline}
+footer{margin-top:64px;padding-top:20px;border-top:1px solid var(--line);color:var(--hint);font-size:13px}
+@media print{body{font-size:12pt}.wrap{max-width:none;padding:0}h2{page-break-after:avoid}.node{page-break-inside:avoid}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<h1>AI-CRM 线索评分助手 · 工作流通关手册</h1>
+<p class="sub">Dify 工作流 13 节点逐节点还原 —— 一面给客户讲明白，一面经得起面试官追问</p>
+<p class="meta">依据：<code>Dify导入_AI-CRM线索评分助手.yml</code>（DSL version 0.1.5）逐节点核对 ｜ 配套资料：客户案例文档、Dify 导入说明、300 条商机数据集分析报告</p>
+
+<div class="hero">
+  <p class="lead">一句话讲清这个工作流</p>
+  <p>把客户从官网表单、白皮书、直播等渠道来的<strong>留言 + 画像 + 行为</strong>，在 30 秒内自动打完分、分好级（SQL / MQL / 无效），并替销售把<strong>第一句跟进话术</strong>写好 —— 分数每一分都能追溯，话术每句话都有知识库出处。</p>
+</div>
+
+<div class="metrics">
+  <div class="metric"><div class="k">节点总数</div><div class="v">13</div></div>
+  <div class="metric"><div class="k">大模型调用</div><div class="v">4 <small>次（含分支）</small></div></div>
+  <div class="metric"><div class="k">评分维度</div><div class="v">3 <small>段可解释</small></div></div>
+  <div class="metric"><div class="k">分级阈值</div><div class="v">60 / 30</div></div>
+  <div class="metric"><div class="k">知识库检索</div><div class="v">top_k 3</div></div>
+</div>
+
+<div class="toc">
+  <ol>
+    <li><a href="#s1">工作流全景与 13 节点速查</a></li>
+    <li><a href="#s2">逐节点拆解（每个节点：干什么 / 怎么配 / 为什么）</a></li>
+    <li><a href="#s3">五个设计精髓（面试官最爱问的"为什么"）</a></li>
+    <li><a href="#s4">客户侧话术包（演示脚本 + 价值 + 边界 + 异议）</a></li>
+    <li><a href="#s5">面试追问 12 问（含答题骨架）</a></li>
+    <li><a href="#s6">我发现的 4 个待改点（说出来就是加分项）</a></li>
+    <li><a href="#s7">面试前 10 分钟自测清单</a></li>
+  </ol>
+</div>
+
+<h2 id="s1">一、工作流全景与 13 节点速查</h2>
+
+<p>整条链路是<strong>一条主干 + 三路出口</strong>。主干按"能规则化的绝不给模型"的原则分工：属性、行为、合分、分级全部用代码节点（确定性、零成本、可审计），只有<strong>非结构化的自然语言理解</strong>交给大模型。</p>
+
+<svg viewBox="0 0 680 490" width="100%" role="img" xmlns="http://www.w3.org/2000/svg" style="margin:8px 0 4px">
+<title>工作流四阶段全景</title>
+<desc>采集与提取、双引擎打分、解析与汇总、分级分流，最终按总分走 SQL、MQL、无效三条分支。</desc>
+<defs><marker id="ar" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+<path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></marker></defs>
+<rect x="40" y="40" width="600" height="58" rx="10" fill="#E6F1FB" stroke="#185FA5" stroke-width="0.5"/>
+<text x="60" y="62" font-family="system-ui,sans-serif" font-size="14" font-weight="500" fill="#0C447C" dominant-baseline="central">① 采集与提取</text>
+<text x="60" y="80" font-family="system-ui,sans-serif" font-size="12" fill="#185FA5" dominant-baseline="central">6 项输入（公司 / 行业 / 规模 / 岗位 / 行为 / 留言）</text>
+<text x="620" y="69" font-family="system-ui,sans-serif" font-size="12" fill="#185FA5" text-anchor="end" dominant-baseline="central">start · extract(LLM)</text>
+<line x1="340" y1="98" x2="340" y2="126" stroke="#185FA5" stroke-width="1.5" marker-end="url(#ar)"/>
+<rect x="40" y="130" width="600" height="58" rx="10" fill="#E6F1FB" stroke="#185FA5" stroke-width="0.5"/>
+<text x="60" y="152" font-family="system-ui,sans-serif" font-size="14" font-weight="500" fill="#0C447C" dominant-baseline="central">② 双引擎打分（规则 + 大模型）</text>
+<text x="60" y="170" font-family="system-ui,sans-serif" font-size="12" fill="#185FA5" dominant-baseline="central">属性 45 分 + 行为 25 分用代码算，意图 30 分交给模型</text>
+<text x="620" y="159" font-family="system-ui,sans-serif" font-size="12" fill="#185FA5" text-anchor="end" dominant-baseline="central">rules(代码) · intent_llm(LLM)</text>
+<line x1="340" y1="188" x2="340" y2="216" stroke="#185FA5" stroke-width="1.5" marker-end="url(#ar)"/>
+<rect x="40" y="220" width="600" height="58" rx="10" fill="#E6F1FB" stroke="#185FA5" stroke-width="0.5"/>
+<text x="60" y="242" font-family="system-ui,sans-serif" font-size="14" font-weight="500" fill="#0C447C" dominant-baseline="central">③ 解析与汇总</text>
+<text x="60" y="260" font-family="system-ui,sans-serif" font-size="12" fill="#185FA5" dominant-baseline="central">解析失败自动兜底 8 分，三维合分后按 60 / 30 划线</text>
+<text x="620" y="249" font-family="system-ui,sans-serif" font-size="12" fill="#185FA5" text-anchor="end" dominant-baseline="central">parse_intent · total(代码)</text>
+<line x1="340" y1="278" x2="340" y2="306" stroke="#185FA5" stroke-width="1.5" marker-end="url(#ar)"/>
+<rect x="40" y="310" width="600" height="58" rx="10" fill="#EEEDFE" stroke="#534AB7" stroke-width="0.5"/>
+<text x="60" y="332" font-family="system-ui,sans-serif" font-size="14" font-weight="500" fill="#26215C" dominant-baseline="central">④ 分级分流（三路）</text>
+<text x="60" y="350" font-family="system-ui,sans-serif" font-size="12" fill="#534AB7" dominant-baseline="central">阈值写在代码里，可调可审计，不用模型做判断</text>
+<text x="620" y="339" font-family="system-ui,sans-serif" font-size="12" fill="#534AB7" text-anchor="end" dominant-baseline="central">branch(if-else)</text>
+<path d="M340 368 V382 H133 V396" fill="none" stroke="#534AB7" stroke-width="1.5" marker-end="url(#ar)"/>
+<path d="M340 368 V396" fill="none" stroke="#534AB7" stroke-width="1.5" marker-end="url(#ar)"/>
+<path d="M340 368 V382 H547 V396" fill="none" stroke="#534AB7" stroke-width="1.5" marker-end="url(#ar)"/>
+<rect x="40" y="400" width="186" height="62" rx="10" fill="#E1F5EE" stroke="#0F6E56" stroke-width="0.5"/>
+<text x="133" y="422" font-family="system-ui,sans-serif" font-size="14" font-weight="500" fill="#085041" text-anchor="middle" dominant-baseline="central">SQL 线索 ≥60 分</text>
+<text x="133" y="438" font-family="system-ui,sans-serif" font-size="12" fill="#0F6E56" text-anchor="middle" dominant-baseline="central">检索知识库 → 生成跟进建议</text>
+<text x="133" y="453" font-family="system-ui,sans-serif" font-size="12" fill="#0F6E56" text-anchor="middle" dominant-baseline="central">销售立即跟进</text>
+<rect x="247" y="400" width="186" height="62" rx="10" fill="#FAEEDA" stroke="#854F0B" stroke-width="0.5"/>
+<text x="340" y="422" font-family="system-ui,sans-serif" font-size="14" font-weight="500" fill="#633806" text-anchor="middle" dominant-baseline="central">MQL 线索 ≥30 分</text>
+<text x="340" y="438" font-family="system-ui,sans-serif" font-size="12" fill="#854F0B" text-anchor="middle" dominant-baseline="central">生成培育触达方案</text>
+<text x="340" y="453" font-family="system-ui,sans-serif" font-size="12" fill="#854F0B" text-anchor="middle" dominant-baseline="central">进入培育池</text>
+<rect x="454" y="400" width="186" height="62" rx="10" fill="#F1EFE8" stroke="#5F5E5A" stroke-width="0.5"/>
+<text x="547" y="422" font-family="system-ui,sans-serif" font-size="14" font-weight="500" fill="#444441" text-anchor="middle" dominant-baseline="central">无效 &lt;30 分</text>
+<text x="547" y="438" font-family="system-ui,sans-serif" font-size="12" fill="#5F5E5A" text-anchor="middle" dominant-baseline="central">不检索、不生成话术</text>
+<text x="547" y="453" font-family="system-ui,sans-serif" font-size="12" fill="#5F5E5A" text-anchor="middle" dominant-baseline="central">自动归档</text>
+</svg>
+
+<h3>13 节点速查表</h3>
+<table>
+<thead><tr><th style="width:26px">#</th><th style="width:150px">节点</th><th style="width:88px">类型</th><th>作用（一句话）</th></tr></thead>
+<tbody>
+<tr><td>1</td><td><code>start</code> 开始</td><td><span class="chip c-gray">输入</span></td><td>收 6 个字段：公司名、留言原文、行业、规模、岗位、行为轨迹</td></tr>
+<tr><td>2</td><td><code>extract</code> 结构化提取</td><td><span class="chip c-blue">LLM</span></td><td>把留言原文洗成 JSON（核心诉求 / 关键词 / 联系方式）</td></tr>
+<tr><td>3</td><td><code>rules</code> 规则评分器</td><td><span class="chip c-purple">代码</span></td><td>算属性分（0-45）+ 行为分（0-25），并输出可读明细</td></tr>
+<tr><td>4</td><td><code>intent_llm</code> 意图评分</td><td><span class="chip c-blue">LLM</span></td><td>读留言判断意向强度，给 0-30 分 + 意图标签 + 理由</td></tr>
+<tr><td>5</td><td><code>parse_intent</code> 意图解析</td><td><span class="chip c-purple">代码</span></td><td>从模型输出里抠 JSON，解析失败自动兜底</td></tr>
+<tr><td>6</td><td><code>total</code> 总分汇总</td><td><span class="chip c-purple">代码</span></td><td>三项相加，按 60 / 30 划出 SQL / MQL / 无效</td></tr>
+<tr><td>7</td><td><code>branch</code> 分级分流</td><td><span class="chip c-purple">if-else</span></td><td>按等级把线索路由到三条完全不同的处理链</td></tr>
+<tr><td>8</td><td><code>retrieve</code> 产品知识检索</td><td><span class="chip c-teal">RAG</span></td><td>用留言原文检索知识库，取最相关 3 段</td></tr>
+<tr><td>9</td><td><code>advice</code> 跟进建议生成</td><td><span class="chip c-blue">LLM</span></td><td>结合检索结果输出四段式跟进建议（含 80 字开场话术）</td></tr>
+<tr><td>10</td><td><code>nurture</code> 培育内容生成</td><td><span class="chip c-blue">LLM</span></td><td>低意向线索生成"推什么资料 + 发什么文案 + 下次何时跟"</td></tr>
+<tr><td>11</td><td><code>end_sql</code> 结束(SQL)</td><td><span class="chip c-gray">输出</span></td><td>回传总分、等级、意图标签、跟进建议</td></tr>
+<tr><td>12</td><td><code>end_mql</code> 结束(MQL)</td><td><span class="chip c-gray">输出</span></td><td>回传总分、等级、培育方案</td></tr>
+<tr><td>13</td><td><code>end_invalid</code> 结束(无效)</td><td><span class="chip c-gray">输出</span></td><td>回传总分、等级、过滤理由</td></tr>
+</tbody>
+</table>
+
+<div class="box">
+<h4>连接关系（对着画布能一眼找到）</h4>
+<p><code>start → extract → rules → intent_llm → parse_intent → total → branch</code>，然后 <code>branch</code> 分出三路：<code>true(≥60) → retrieve → advice → end_sql</code>；<code>case_2(≥30) → nurture → end_mql</code>；<code>false → end_invalid</code>。共 12 条连线。</p>
+</div>
+
+<h2 id="s2">二、逐节点拆解</h2>
+<p>每个节点按"<strong>干什么 → 怎么配 → 为什么这么设计</strong>"三段讲。面试时只需要讲清楚这一段，就足以证明你是"搭过"的人，而不是"看图说话"的人。</p>
+
+<h3>阶段①：采集与提取</h3>
+
+<div class="node">
+<div class="head"><span class="no">01</span><span class="nm">开始</span><span class="id">start</span><span class="chip c-gray">输入节点</span></div>
+<p class="what">整个工作流的入口。它不是简单的"表单"，而是<strong>把线索拆成了三类信息</strong>：静态属性（行业/规模/岗位）、行为轨迹、非结构化文本（留言）。这个字段设计本身就是项目最值钱的部分 —— 因为后面的评分维度完全由它决定。</p>
+<ul class="facts">
+<li><b>必填</b>留言原文 <code>lead_raw</code>（2000 字）、行业 <code>industry</code>、公司规模 <code>company_size</code>、岗位 <code>job_title</code>（均为下拉）</li>
+<li><b>选填</b>公司名称 <code>company</code>（64 字）、近期行为 <code>behaviors</code>（顿号分隔文本）</li>
+<li><b>选项枚举</b>行业 7 类（含"学生个人"专门作负分项）；规模 5 档；岗位 5 类</li>
+</ul>
+<p class="why">设计理由：行业/规模/岗位做成<strong>下拉而不是自由文本</strong>，是为了让下游代码节点能用字典精确匹配打分 —— 如果让用户随便填"做软件的""互联网公司"，规则引擎就没法稳定命中。这是"为下游服务的输入设计"，面试时值得主动讲。</p>
+</div>
+
+<div class="node">
+<div class="head"><span class="no">02</span><span class="nm">结构化提取</span><span class="id">extract</span><span class="chip c-blue">LLM</span><span class="chip c-gray">temperature 0.2</span></div>
+<p class="what">客户留言是最脏的数据 —— 有人写"想了解下"、有人写"我们 CRM 想嵌 AI 评分，支持 API 吗"。这个节点把一段自由文本<strong>洗成标准 JSON</strong>：<code>need_summary</code>（核心诉求，≤30 字）、<code>need_keywords</code>（最多 5 个关键词）、<code>contact</code>（联系方式或 null）。</p>
+<ul class="facts">
+<li><b>输入</b><code>{{#start.lead_raw#}}</code> 原始留言</li>
+<li><b>提示词约束</b>"仅输出 JSON，不要输出任何其他内容"+"只依据留言原文提取，禁止编造"+"数字、产品名保持原样"</li>
+<li><b>模型</b>gpt-4o-mini，temperature 0.2</li>
+</ul>
+<p class="why">设计理由：把"理解人话"和"做判断"拆开。提取节点只负责<strong>忠实转写</strong>（不判断、不打分），这样一旦下游分数不对，能明确区分是"没读懂"还是"规则不合理"，方便定位问题。</p>
+</div>
+
+<h3>阶段②：双引擎打分（这套设计的心脏）</h3>
+
+<div class="node">
+<div class="head"><span class="no">03</span><span class="nm">规则评分器</span><span class="id">rules</span><span class="chip c-purple">代码节点</span><span class="chip c-teal">属性 45 + 行为 25</span></div>
+<p class="what">用一段 Python 把"行业 + 规模 + 岗位 + 行为"翻译成分数。这是<strong>全部评分里最需要向客户解释清楚的部分</strong>，因为它直接决定了销售信不信这个分数。</p>
+<ul class="facts">
+<li><b>行业分</b>软件/互联网 15、金融 12、制造业 10、医疗 10、教育 5、学生个人 <b>-20</b></li>
+<li><b>规模分</b>500 人以上 15、100-499 人 12、20-99 人 8、1-19 人 5、个人/无 -5</li>
+<li><b>岗位分</b>IT 负责人/技术总监 15、采购/商务负责人 12、销售/市场负责人 8、普通员工 3、学生 0</li>
+<li><b>属性分</b>三项相加后 <b>clamp 到 0~45</b>（防止单项极值把总分带偏）</li>
+<li><b>行为分</b>打开报价邮件 15、预约产品演示 15、观看演示视频 12、访问集成对接页 10、一周内多次访问官网 10、下载白皮书 8；按顿号/逗号切词累加，<b>封顶 25</b></li>
+<li><b>同时输出</b><code>attribute_detail</code> / <code>behavior_detail</code> 两串人类可读明细，如"行业[金融]: +12；规模[500人以上]: +15；岗位[采购/商务负责人]: +12"</li>
+</ul>
+<p class="why">设计理由有三层：① <strong>可解释</strong> —— 销售看到的不只是"72 分"，而是"这 72 分是怎么来的"，不服可以申诉；② <strong>零成本零波动</strong> —— 确定性判断交给代码，同样的输入永远得同样的分，不消耗 token；③ <strong>可调</strong> —— 权重和阈值都是显式字典，客户说"我们金融行业最好跟"改一个数字就行，不用重训模型。</p>
+</div>
+
+<div class="node">
+<div class="head"><span class="no">04</span><span class="nm">意图评分</span><span class="id">intent_llm</span><span class="chip c-blue">LLM</span><span class="chip c-gray">temperature 0.2</span></div>
+<p class="what">留言里"想了解下"和"支持 API 对接吗"含金量差十倍，这个差别<strong>只有语义理解能抓</strong>。节点从资深销售视角给留言打 0-30 分，并给出意图标签和一句话理由。</p>
+<ul class="facts">
+<li><b>六档评分标准</b>（直接写在提示词里）集成/嵌入/API/iframe 对接 25-30 ｜ 问报价费用 22-28 ｜ 约演示/申请试用 18-24 ｜ 问功能细节 10-16 ｜ 泛泛了解 0-6 ｜ 其他一般咨询 7-12</li>
+<li><b>意图标签</b>集成需求 / 价格咨询 / 演示试用 / 技术咨询 / 一般了解 / 随便看看（六选一，供后续分群统计）</li>
+<li><b>输出</b><code>intent_score</code> + <code>intent_tag</code> + <code>reason</code>（评分理由）</li>
+</ul>
+<p class="why">设计理由：这是<strong>规则做不了、模型最擅长</strong>的部分 —— 一词之差就跨越了 20 分。把评分标准写死在提示词里（而不是让模型自由发挥），是为了让分数可复现、可解释，本质上是"用提示词实现了一套软规则"。</p>
+</div>
+
+<h3>阶段③：解析与汇总</h3>
+
+<div class="node">
+<div class="head"><span class="no">05</span><span class="nm">意图结果解析</span><span class="id">parse_intent</span><span class="chip c-purple">代码节点</span><span class="chip c-teal">工程健壮性</span></div>
+<p class="what">大模型输出不稳定是常态：可能裹在 ```json 里、可能前面加一句"好的，分析如下"。这个节点用正则 <code>\{.*\}</code> 把 JSON 抠出来解析，<strong>解析失败就兜底返回 8 分 + "一般了解" + 说明文字</strong>，绝不让主流程报错崩溃。</p>
+<ul class="facts">
+<li><b>兜底值</b><code>score=8, tag='一般了解', reason='未解析出JSON，按一般咨询兜底'</code></li>
+<li><b>二次保险</b>解析出的分数再 <code>max(0, min(30, score))</code> 强制夹紧到 0-30</li>
+<li><b>理由截断</b><code>reason[:80]</code>，防止模型啰嗦撑爆输出</li>
+</ul>
+<p class="why">设计理由：这 12 行代码是整个工作流的"<strong>安全气囊</strong>"。POC 演示最怕现场翻车 —— 模型偶尔抽风返回一段散文，没有这个节点整个流程就断了；有了它，最坏情况只是这条线索降级为"一般了解"（进 MQL 培育池），业务不中断。这是能体现工程思维的细节，面试一定要主动讲。</p>
+</div>
+
+<div class="node">
+<div class="head"><span class="no">06</span><span class="nm">总分汇总</span><span class="id">total</span><span class="chip c-purple">代码节点</span><span class="chip c-teal">60 / 30 阈值</span></div>
+<p class="what">三段分数合体，按两条线划成三个等级。整个工作流的"判决书"就是这 8 行代码。</p>
+<ul class="facts">
+<li><b>合分</b><code>total = round(属性分 + 行为分 + 意图分)</code>，满分 100（45+25+30）</li>
+<li><b>分级</b><code>≥60 → SQL</code>（销售立即跟进）｜<code>≥30 → MQL</code>（进培育池）｜<code>else → INVALID</code>（自动过滤）</li>
+<li><b>输出</b><code>total_score</code> + <code>grade</code></li>
+</ul>
+<p class="why">设计理由：把阈值放在代码里而不是让模型"判断这条线索值不值"，是因为<strong>概率模型不适合做确定性裁决</strong>。阈值可审计、可回归测试、可按客户业务调整 —— 这句话在客户面前极有分量。</p>
+</div>
+
+<h3>阶段④：分级分流</h3>
+
+<div class="node">
+<div class="head"><span class="no">07</span><span class="nm">分级分流</span><span class="id">branch</span><span class="chip c-purple">if-else</span></div>
+<p class="what">一颗三岔路口。三个出口分别接三条完全不同的处理链 —— 这是"分级"真正产生业务价值的地方：不是打个标签就完了，而是<strong>不同等级的线索走不同的自动化动作</strong>。</p>
+<ul class="facts">
+<li><b>分支 1（true）</b><code>total_score ≥ 60</code> → 走 <code>retrieve → advice → end_sql</code></li>
+<li><b>分支 2（case_2）</b><code>total_score ≥ 30</code> → 走 <code>nurture → end_mql</code></li>
+<li><b>分支 3（false）</b>其余 → 直接 <code>end_invalid</code></li>
+</ul>
+<p class="why">设计理由：<strong>成本控制点</strong>。无效线索不会触发知识库检索和话术生成（省下 1 次向量检索 + 1 次大模型调用）。按 300 条/日的量级，约 77% 的线索被拦在这里，token 花在真正值得跟的客户身上。</p>
+</div>
+
+<h3>SQL 支线：把"高分线索"变成"销售能直接用的弹药"</h3>
+
+<div class="node">
+<div class="head"><span class="no">08</span><span class="nm">产品知识检索</span><span class="id">retrieve</span><span class="chip c-teal">RAG 知识库</span></div>
+<p class="what">在这条线索被确认是高价值之后，才去查资料 —— 用<strong>客户留言原文</strong>当查询词，从知识库里取最相关的 3 段内容，喂给下游生成节点当"事实依据"。</p>
+<ul class="facts">
+<li><b>查询词</b><code>{{#start.lead_raw#}}</code>（原始留言，不是提取后的摘要）</li>
+<li><b>检索配置</b>multiple 模式、<code>top_k=3</code>、rerank 关闭、score_threshold 为空</li>
+<li><b>知识库</b>3 份文档：《产品功能手册》《常见问题 FAQ》《客户案例集》</li>
+<li><b>注意</b>DSL 里 <code>dataset_ids</code> 为空 —— 导入后<strong>必须手动绑定</strong>知识库，否则这个节点取不到内容</li>
+</ul>
+<p class="why">设计理由：这是防幻觉的第一道闸。话术里但凡涉及产品能力、报价口径，都必须来自检索到的资料，而不是模型的记忆。用留言原文而非摘要做查询词，是因为原始表述里的"API""集成"等词才是向量匹配的关键信号。</p>
+</div>
+
+<div class="node">
+<div class="head"><span class="no">09</span><span class="nm">跟进建议生成</span><span class="id">advice</span><span class="chip c-blue">LLM</span><span class="chip c-gray">temperature 0.4</span></div>
+<p class="what">把"这条线索是谁、想干什么、为什么分高"打包给模型，输出<strong>销售可以直接复制粘贴的四段式跟进建议</strong>：客户痛点 / 核心需求 / 沟通重点 / 开场话术（80 字以内、口语化）。</p>
+<ul class="facts">
+<li><b>上下文注入</b>context 开关打开，绑定 <code>retrieve.result</code> —— 知识库内容进入提示词</li>
+<li><b>输入变量</b>公司/行业/规模/岗位、留言原文、核心诉求、意图标签+理由、属性明细、行为明细</li>
+<li><b>防幻觉指令</b>"优先依据知识库资料回答；资料未覆盖的功能点，明确写'需与产品团队确认'，禁止编造"</li>
+<li><b>禁止空话</b>"必须回应客户留言中的原始诉求，禁止空话"</li>
+</ul>
+<p class="why">设计理由：这段提示词是整个项目里最像"售前老手"的地方 —— 它同时解决了三个输出质量问题：不编造（约束来源）、不跑题（必须回应原始诉求）、不像机器（80 字口语化开场话术，销售能直接用）。温度调到 0.4 是为了让话术有点人味但不失控。</p>
+</div>
+
+<div class="node">
+<div class="head"><span class="no">11</span><span class="nm">结束(SQL)</span><span class="id">end_sql</span><span class="chip c-gray">输出节点</span></div>
+<p class="what">SQL 支线的出口，回传 4 个字段：<code>total_score</code>、<code>grade</code>、<code>intent_tag</code>、<code>followup_advice</code>。这 4 个字段就是一条可以推给销售的企业微信/CRM 卡片的内容。</p>
+</div>
+
+<h3>MQL 支线：不硬推，先养着</h3>
+
+<div class="node">
+<div class="head"><span class="no">10</span><span class="nm">培育内容生成</span><span class="id">nurture</span><span class="chip c-blue">LLM</span><span class="chip c-gray">temperature 0.5</span></div>
+<p class="what">意向还不够热的线索，硬推销只会把人推跑。这个节点输出三行<strong>培育方案</strong>：推荐资料（行业案例 / 白皮书 / 落地视频 选一类）、触达文案（60 字以内，亲切专业不硬销）、下次触达建议（时间 + 内容）。</p>
+<ul class="facts">
+<li><b>输入</b>客户公司 + 行业 + 核心诉求 + 意图标签（<strong>不带知识库上下文</strong>，省成本）</li>
+<li><b>温度</b>0.5 —— 全流程最高，需要文案有变化、不重复</li>
+<li><b>出口</b><code>end_mql</code> 回传总分、等级、<code>nurture_plan</code></li>
+</ul>
+<p class="why">设计理由：<strong>SDR 培育逻辑的自动化</strong>。低意向线索的正确处理不是"跟"也不是"丢"，而是"持续给内容、等他自己长大"。把培育动作也交给 AI，就把销售从"发资料"这种低价值重复劳动里解放出来了。</p>
+</div>
+
+<h3>无效支线：果断减负</h3>
+
+<div class="node">
+<div class="head"><span class="no">13</span><span class="nm">结束(无效过滤)</span><span class="id">end_invalid</span><span class="chip c-gray">输出节点</span></div>
+<p class="what">总分低于 30 的线索（典型：学生、竞品调研、随便看看）在这里被拦住，回传总分、等级和<code>filter_reason</code>（过滤理由，取自意图评分的理由字段）。<strong>不做检索、不生成任何话术</strong>，直接归档。</p>
+<p class="why">设计理由：无效线索占总量的大多数，让它们不进入任何付费调用，是这套 POC 成本可控的关键。同时保留 <code>filter_reason</code> 让过滤可复盘 —— 万一误杀了真客户，能查出是哪条规则判错了。</p>
+</div>
+
+<h2 id="s3">三、五个设计精髓</h2>
+<p>这五条是"技术选型的理由"，也是面试官必然会挖的地方。客户可能听不懂节点，但一定听得懂这五句话。</p>
+
+<h3>精髓 1｜规则与大模型分工：能规则化的，绝不给模型</h3>
+<p>行业、规模、岗位、行为轨迹是<strong>结构化、有限枚举</strong>的判断，用代码做：零成本、100% 可复现、永远可解释。留言意图是<strong>非结构化语义</strong>理解，规则写不完（"想嵌一下"、"有没有开放接口"、"能不能接我们自己的系统"都是一个意思），交给模型。</p>
+<div class="copy"><span class="tag">客户话术</span>
+<p>"我们没有让 AI 去猜所有事情。能算准的我们用规则算，算得又快又便宜还能查账；只有'客户这句话到底什么意思'才交给 AI —— 这就是为什么我们敢承诺分数可解释。"</p></div>
+
+<h3>精髓 2｜三段式可解释评分：分数是"论述题"，不是"判断题"</h3>
+<p>每条线索的分数都能拆回明细：属性分（谁的画像）+ 行为分（干了什么）+ 意图分（说了什么）。销售看到的不是"AI 说这条 72 分"，而是"金融行业 +12、500 人以上 +15、采购负责人 +12、上周打开过报价邮件 +15、问的是 API 集成 28 分"。</p>
+<div class="copy"><span class="tag">客户话术</span>
+<p>"销售最怕的是 AI 给个黑箱分数。我们把分数拆成明细摆在销售面前，他不同意可以申诉，我们拿申诉数据反过来校准规则 —— 这套闭环比追求 95% 准确率更重要，因为只有销售信了，系统才用得起来。"</p></div>
+
+<h3>精髓 3｜解析兜底：让模型的不稳定不变成系统的不可用</h3>
+<p>大模型输出格式漂移是工程事实。工作流里专门放了一个"意图结果解析"代码节点，正则抠 JSON + 失败兜底 8 分 + 分数夹紧，保证<strong>任何情况下主流程都能走完并给出结论</strong>。</p>
+<div class="copy"><span class="tag">客户话术</span>
+<p>"大模型偶尔会不按格式输出，这很正常。我们的设计是：它不听话，系统也不会崩，最坏就是这条线索降级进培育池，不会出现销售那边等不到结果的情况。"</p></div>
+
+<h3>精髓 4｜RAG 防幻觉：话术必须有出处，没有就说不确定</h3>
+<p>三段防线：① 生成前先检索知识库（3 份文档：功能手册 / FAQ / 案例集）；② 检索内容通过 context 注入提示词；③ 提示词明确要求"资料未覆盖的写'需与产品团队确认'，禁止编造"。</p>
+<div class="copy"><span class="tag">客户话术</span>
+<p>"AI 写的话术里涉及的报价和功能，都是从你们自己的产品文档里检索出来的。文档里没有的，它会写'需与产品团队确认'，而不是编一个数字 —— 在售前场景里，一句错承诺的代价比少写一句话大得多。"</p></div>
+
+<h3>精髓 5｜成本与温度的分层设计</h3>
+<p><strong>成本上</strong>：条件分支前置，约 77% 的线索（无效）不触发检索与话术生成；MQL 支线不注入知识库上下文。<strong>温度上</strong>：提取 0.2、意图 0.2（要稳定可复现）、建议 0.4（要人味）、培育 0.5（要变化）。同一套工作流里，什么任务用什么参数，是明确设计过的。</p>
+<div class="copy"><span class="tag">客户话术</span>
+<p>"不是每条线索都值得花一次大模型调用。我们让系统先把 70% 没价值的线索免费筛掉，钱花在真正值得跟的客户身上 —— 这也是为什么这套方案的单条处理成本能压到很低。"</p></div>
+
+<h2 id="s4">四、客户侧话术包</h2>
+
+<h3>4.1 三分钟演示脚本（照着走）</h3>
+<table>
+<thead><tr><th style="width:60px">步骤</th><th style="width:150px">动作</th><th>你要说的话</th></tr></thead>
+<tbody>
+<tr><td>0:00</td><td>开场，不打开系统</td><td>"先问一个问题：您这边市场部每天收到多少条线索？是销售一条条看，还是系统帮您挑？"（等对方说，然后接）"我们今天不做概念介绍，直接现场跑三条真实类型的线索给您看。"</td></tr>
+<tr><td>0:30</td><td>跑用例 1（SQL）</td><td>"苏州一家设备制造企业，IT 负责人留的言：'旧 CRM 想嵌 AI 评分，支持 API 对接吗？' —— 注意看，系统给了 72 分，判成 SQL。这个分不是拍的：软件/制造行业 10 分、500 人以上 15 分、IT 负责人 15 分、上周打开过报价邮件 15 分、问的是 API 集成 28 分。"</td></tr>
+<tr><td>1:30</td><td>展开跟进建议</td><td>"系统顺手把第一句话写好了 —— 而且这话术里的产品能力，是从您自己的产品文档里检索出来的，不是 AI 编的。销售拿到手，一眼看到痛点、需求、沟通重点和开场白，直接就能打电话。"</td></tr>
+<tr><td>2:15</td><td>跑用例 2（MQL）+ 用例 3（无效）</td><td>"换成杭州一家电商公司的普通员工，留言'先了解一下功能' —— 45 分，MQL，系统不硬推，给了一条培育方案：推什么资料、发什么文案、什么时候再跟。再看第三条，学生留言'写作业需要了解 CRM' —— 12 分，直接拦掉，不占用任何资源。三条线索，三种动作。"</td></tr>
+<tr><td>3:00</td><td>收尾抛问题</td><td>"您现在的流程里，从客户留资到销售第一次联系上，平均要多久？"（对方答"一天以上"）"这套跑完不超过 30 秒，而且第一句话已经写好了 —— 我们现在缺的只是您这边的真实数据，做两周回测把分数线校准到您的业务习惯上。"</td></tr>
+</tbody>
+</table>
+
+<h3>4.2 痛点 → 方案 → 收益（对着客户的痛点说）</h3>
+<table>
+<thead><tr><th style="width:170px">客户痛点</th><th>对应设计与动作</th><th style="width:150px">可量化收益</th></tr></thead>
+<tbody>
+<tr><td>响应慢，留资到首次触达 &gt;24 小时</td><td>全流程 30 秒完成打分 + 自动生成开场话术，可直接推送销售</td><td>首次触达压到<b>分钟级</b></td></tr>
+<tr><td>判断主观，销售标准不一</td><td>三段式可解释评分 + 60/30 阈值硬规则，人人同一把尺</td><td>300 条/日 → 销售只需看 <b>70 条 SQL</b>，人效 <b>≈4.3 倍</b></td></tr>
+<tr><td>无效线索（学生、调研）浪费人力</td><td><code>branch</code> 前置拦截，不检索不生成话术</td><td>无效线索占用人力 <b>≈1 人/日 → 0</b></td></tr>
+<tr><td>话术千篇一律，回复率低</td><td>RAG 知识库 + 四段式提示词，按客户诉求定制</td><td>首触质量提升、话术<b>有出处可追溯</b></td></tr>
+</tbody>
+</table>
+
+<h3>4.3 必须主动讲的五条边界（讲清边界反而更可信）</h3>
+<ol>
+<li><b>数据依赖</b>：行为轨迹（预约演示、打开报价邮件等）依赖埋点与渠道回传，接入前要先确认客户 CRM/表单能不能给出这些字段。给不出，就只剩属性分 + 意图分（满分 75）。</li>
+<li><b>阈值需要校准</b>：60/30 是初始值，必须用客户近 6 个月的成交/流失线索回测 2-4 周后才能定稿。<b>不要承诺"开箱即准"</b>。</li>
+<li><b>幻觉边界</b>：话术中的产品参数以知识库为准，未覆盖的内容会输出"需与产品团队确认"，<b>不能直接对外承诺</b>。</li>
+<li><b>合规边界</b>：客户留言与个人信息仅用于本条线索跟进，需在隐私政策中声明；不做跨客户数据训练。</li>
+<li><b>平台依赖</b>：Coze/Dify 版本迭代可能影响节点行为，重大升级前需回归测试。</li>
+</ol>
+
+<h3>4.4 三个必问异议的应答</h3>
+<table>
+<thead><tr><th style="width:210px">客户会说</th><th>你怎么答</th></tr></thead>
+<tbody>
+<tr><td>"我们自己用大模型就能打标了，为什么要买？"</td><td>"能打标和能落地是两件事。自己调一版打分很快，但销售不信黑箱分数，用两周就废了。我们交付的是三样东西：可解释的评分模型、按您业务校准的阈值、以及销售申诉反哺的迭代闭环 —— 这部分是'业务适配'，不是技术问题。"</td></tr>
+<tr><td>"客户留言涉及隐私，能上云吗？"</td><td>"两个层面：一是可以私有化部署（Dify 支持本地部署、模型可换成本地/私有模型），数据不出您的内网；二是即使上云，我们也只传本条线索所需字段，不做跨客户数据训练。这一条可以写进合同。"</td></tr>
+<tr><td>"准确率能到多少？"</td><td>"我不给一个漂亮的数字。POC 阶段我们看的是'AI 分级与销售人工判断的一致率'，验收线是双盲对比 ≥80%；上线后最终指标是 SQL 线索的成交率有没有提升。准确率对不上口径就没意义，所以我们建议先把一致率跑出来给您看。"</td></tr>
+</tbody>
+</table>
+
+<h2 id="s5">五、面试追问 12 问</h2>
+<p>每一问都按"<strong>先给结论，再给理由，最后给一个细节</strong>"的结构答。最后那个细节才是拉开差距的地方。</p>
+
+<div class="qa"><p class="q"><span class="qn">Q1</span>为什么不让大模型直接打总分，非要拆成规则 + 模型？</p>
+<p class="a"><b>结论：</b>因为只有一部分判断适合模型。<b>理由：</b>行业、规模、岗位、行为是有限枚举的确定性判断 —— 用代码算，成本是 0、结果 100% 可复现、还能输出明细供销售申诉；模型打分会有随机性，同一线索两次跑出不同分，销售就不信了。<b>细节：</b>你看我的规则节点里特意做了 <code>clamp(0,45)</code> 和 <code>min(25)</code> 封顶，就是防止某个单项极值把总分带偏 —— 这类边界处理是"想清楚了"和"跑通了"的区别。</p></div>
+
+<div class="qa"><p class="q"><span class="qn">Q2</span>60 / 30 这两条线是怎么定的？</p>
+<p class="a"><b>结论：</b>POC 阶段是经验初始值，不是算出来的，必须回测校准 —— 这一点我从不粉饰。<b>理由：</b>当时没有客户的真实成交样本，我按"满分 100 分、SQL 需要画像好 + 有强行为 + 强意图同时成立"的常识设了 60；30 是"至少有一项明显正向信号"。<b>细节：</b>校准方法是拿客户近 6 个月<strong>已成交和已流失</strong>的线索做回测，看不同切分点下的精确率/召回率取舍 —— 业务上宁可漏掉也不能误杀（漏掉的还能培育回来，误杀的客户就丢了），所以阈值会偏向"宁松勿紧"。</p></div>
+
+<div class="qa"><p class="q"><span class="qn">Q3</span>大模型输出格式不稳定怎么办？</p>
+<p class="a"><b>结论：</b>三层防护，缺一不可。<b>理由：</b>第一层提示词强约束（"仅输出 JSON，不要输出任何其他内容"）；第二层 temperature 压到 0.2 降低随机性；第三层是独立的解析节点兜底。<b>细节：</b>兜底不是"报错重试"而是"降级给默认值 8 分 + 一般了解"，因为业务上一条线索降级进培育池的代价，远小于整个流程卡死让销售等不到结果。另外解析出来的分数我会再夹紧一次 0-30，防止模型返回 300 分这种越界值。</p></div>
+
+<div class="qa"><p class="q"><span class="qn">Q4</span>怎么保证 AI 生成的话术不瞎编？</p>
+<p class="a"><b>结论：</b>不让它自由发挥，只让它"基于资料说话"，并明确允许它说不确定。<b>理由：</b>三段设计 —— 生成前先做知识库检索（3 份文档）、检索结果用 context 注入提示词、提示词里写明"资料未覆盖的功能点，明确写'需与产品团队确认'，禁止编造"。<b>细节：</b>我不会对客户说"绝无幻觉"，这是不诚实的。准确说法是"把输出约束在可验证的范围内"——涉及报价和功能的表述必须能回溯到知识库某一段。真上线还会加人审环节。</p></div>
+
+<div class="qa"><p class="q"><span class="qn">Q5</span>成本怎么控制？一条线索大概花多少？</p>
+<p class="a"><b>结论：</b>靠"分支前置 + 分级调用"，不是靠省提示词。<b>理由：</b>每条线索必跑 2 次小模型调用（结构化提取 + 意图评分）；只有 SQL 线索再走 1 次向量检索 + 1 次话术生成，MQL 走 1 次培育生成；无效线索（约 77%）到分支就结束了。<b>细节：</b>具体金额取决于客户选哪个模型（我在 DSL 里默认用的是轻量模型 gpt-4o-mini，实际部署建议换成 DeepSeek 或私有模型进一步降本）。给客户算账时我会按"每月线索量 × 各等级占比"列一张表，而不是报一个笼统单价。</p></div>
+
+<div class="qa"><p class="q"><span class="qn">Q6</span>为什么分级用 if-else 而不是让模型判断？</p>
+<p class="a"><b>结论：</b>确定性裁决不该交给概率模型。<b>理由：</b>阈值是业务规则，需要可审计、可回归测试、能被业务方改 —— 客户说"我们金融行业可以放宽到 55 分"，我改一个数字就生效，不需要重训模型、也不用重新评估准确率。<b>细节：</b>而且 if-else 是零成本的，如果让模型判分级，每天几百条线索全都要多花一次调用，这是纯粹的浪费。</p></div>
+
+<div class="qa"><p class="q"><span class="qn">Q7</span>这个工作流现在能直接上线给客户用吗？还缺什么？</p>
+<p class="a"><b>结论：</b>不能，它是一份合格的 POC，离生产还有 4 件事。<b>理由：</b>① 缺真实数据回测（阈值未经校准）；② 缺 CRM 回写（现在结果只在 Dify 里，没回流到客户客户档案）；③ 缺评分申诉的界面和留痕；④ 缺监控告警（模型调用失败、兜底命中率没有观测）。<b>细节：</b>我把它定位成"需求验证原型"，价值在于让客户在两周内看到效果、把需求聊具体 —— 直接和生产环境绑定反而是不负责任的。</p></div>
+
+<div class="qa"><p class="q"><span class="qn">Q8</span>怎么评估这套评分到底有没有效？</p>
+<p class="a"><b>结论：</b>分两层指标，POC 期看一致率，上线后看成交率。<b>理由：</b>POC 阶段用双盲对比 —— 让 AI 和资深销售各自独立给同一批线索分级，一致率 ≥80% 才允许上线；上线后真正的指标是 SQL 线索的成交转化率有没有提升。<b>细节：</b>为什么先看一致率？因为销售如果发现 AI 判断和他们的直觉差太多，系统再准也不会被使用。先让系统"和专家对齐"，再谈"比专家更好"。</p></div>
+
+<div class="qa"><p class="q"><span class="qn">Q9</span>如果客户要用自己现有的 CRM，怎么接？</p>
+<p class="a"><b>结论：</b>通过 API 做双向对接，不需要改客户的 CRM 逻辑。<b>理由：</b>Dify 工作流可以发布成 API/Webhook —— 客户 CRM 里的表单提交、或埋点事件触发时调一次，把返回的各项分数和话术写回客户档案对应字段。<b>细节：</b>真正的工作量不在技术，而在字段映射和确认：客户的 CRM 里"岗位"是什么枚举值、"行为轨迹"有没有存 —— 这一步通常要跟客户的销售运营一起过一遍，这也是售前该做的事。</p></div>
+
+<div class="qa"><p class="q"><span class="qn">Q10</span>知识库为什么是这 3 份文档？检索参数为什么是 top_k=3？</p>
+<p class="a"><b>结论：</b>3 份文档覆盖售前最常被问的三类问题，top_k=3 是 POC 的成本与信息量折中。<b>理由：</b>《产品功能手册》答"能不能做到"、《常见问题 FAQ》管报价口径和数据安全这类高频问题、《客户案例集》提供同行业背书 —— 正好对应销售被问崩的三个场景。<b>细节：</b>分片和 rerank 我故意在 POC 里关了，是为了简化变量、先跑通主链路；生产环境我会打开 rerank 并做分片调优，因为脏文档切得太碎反而会拉低检索质量。</p></div>
+
+<div class="qa"><p class="q"><span class="qn">Q11</span>为什么不同节点的温度不一样？</p>
+<p class="a"><b>结论：</b>任务性质决定温度 —— 要确定性就压到 0.2，要人味就放到 0.4-0.5。<b>理由：</b>结构化提取和意图评分必须可复现（同一条留言两次跑出来的分数不能不一样，否则销售会质疑），所以 0.2；跟进话术需要自然流畅但不能跑偏，0.4；培育文案希望有变化、不千篇一律，0.5。<b>细节：</b>这种"同一工作流里按节点调参"的细节，其实反映了我对每个节点职责的定位 —— 温度不是统一设一个默认值就完事的。</p></div>
+
+<div class="qa"><p class="q"><span class="qn">Q12</span>这个项目里你具体做了什么？</p>
+<p class="a"><b>结论：</b>需求拆解 + 工作流搭建 + 交付文档，三件事都是我自己做的；需求访谈的对象是模拟的（这是求职作品集的定位，我会主动说明）。<b>理由：</b>需求拆解是把"能不能让 AI 先帮我们看一遍线索"这种模糊诉求，翻译成输入字段、输出格式、流程节点和验收标准；搭建是在 Dify/Coze 上把 13 个节点的提示词、代码、变量绑定全部跑通，并做了 3 条测试用例验证。<b>细节：</b>另外我做了配套的 Python 批量脚本（读 Excel 批量生成跟进消息）、300 条模拟商机的数据分析（用统计结果反过来验证"岗位比规模更关键""下载白皮书是弱信号"这些权重假设是否站得住）。<b>我不会夸大成"生产上线项目"——它是一个完整闭环的 POC。</b></p></div>
+
+<h2 id="s6">六、我发现的 4 个待改点</h2>
+<p>面试里主动说出这些，比背诵"我做得很好"更有杀伤力 —— 它证明你真正读懂了这条工作流，而不是复制粘贴了一个模板。而且这些改动都在 10 分钟内能做完，建议演示前就改掉。</p>
+
+<div class="box warn">
+<h4>待改点 1｜两份文档的"行为分"口径不一致（演示前必须修）</h4>
+<p><code>Dify导入说明.md</code> 里写的是"预约演示 12 / 试用注册 9 / 浏览价格页 8"，但 DSL 里 <code>rules</code> 节点的代码实际是"打开报价邮件 15 / 预约产品演示 15 / 观看演示视频 12 / 访问集成对接页 10 / 一周内多次访问官网 10 / 下载白皮书 8"。<b>两套完全对不上。</b></p>
+<p><b>风险：</b>客户或面试官把说明文档和画布一对照，立刻能看出来 —— 这比说错一个数字更伤，因为它怀疑的是严谨性。<b>改法：</b>把 <code>Dify导入说明.md</code> 的评分口径改成与代码一致，或者反过来把代码改成文档里的那套（推荐前者，代码里的行为项更丰富、更贴合 B2B 场景）。</p>
+</div>
+
+<div class="box warn">
+<h4>待改点 2｜提取节点的 JSON 没被解析，被当成"核心诉求"直接喂给了下游</h4>
+<p><code>advice</code> 节点里写的 <code>核心诉求：{{#extract.text#}}</code> —— 而 <code>extract.text</code> 是模型输出的<strong>整段 JSON 字符串</strong>（形如 <code>{"need_summary":"...","need_keywords":[...],"contact":"..."}</code>），不是干净的"核心诉求"。</p>
+<p><b>影响：</b>模型每次都要多绕一层去理解这段 JSON，既浪费 token 又可能理解偏；而且 JSON 里还夹带 <code>contact</code> 联系方式，等于把无关信息混进了提示词。<b>改法：</b>在 <code>extract</code> 之后加一个极短的代码节点（或直接把 extract 节点改成结构化输出），解析出 <code>need_summary</code> 和 <code>need_keywords</code> 再往下传，提示词里就写 <code>{{#parse_extract.need_summary#}}</code>。这是最能体现工程细节的一处优化。</p>
+</div>
+
+<div class="box warn">
+<h4>待改点 3｜兜底是"静默"的，出了问题你不知道</h4>
+<p><code>parse_intent</code> 解析失败时只返回默认 8 分，<strong>没有任何标记</strong>。也就是说模型连续 100 次输出格式错误，整个系统会安静地给 100 条线索打 8 分，永远不会有人发现。</p>
+<p><b>改法：</b>给兜底返回加一个 <code>is_fallback: true</code> 字段并打到输出里（或写日志），配合监控看"兜底命中率"。这个指标直接反映模型可用性，是生产环境必备的可观测性设计。</p>
+</div>
+
+<div class="box warn">
+<h4>待改点 4｜"无效线索不进付费 LLM 节点"这句话说过头了</h4>
+<p>README 和案例文档里都写了"条件分支前置，无效线索不进付费 LLM 节点"。但严格说，无效线索<strong>已经跑过了 <code>extract</code> 和 <code>intent_llm</code> 两次大模型调用</strong> —— 省掉的只是知识库检索和话术/培育生成。</p>
+<p><b>改法：</b>把表述改成"无效线索不触发知识库检索与话术生成，省下最贵的一段"。<b>为什么这个点重要：</b>如果在面试里把成本优势说过头，被追问"那提取和意图评分不是也调了模型吗"，就是当场翻车。精确 > 好听。</p>
+</div>
+
+<h2 id="s7">七、面试前 10 分钟自测清单</h2>
+<p>逐条自问，能不看稿讲出来就算过关。任何一条卡住，回去翻对应章节。</p>
+<ul class="check">
+<li>能用一句话说清这个工作流解决什么问题（不出现"节点""编排"这类词）</li>
+<li>能报出 13 个节点的名字和顺序，并说清每个节点一句话的作用</li>
+<li>能解释为什么属性和行为用代码算、只有意图用大模型</li>
+<li>能背出三段评分的满分值（45 / 25 / 30）和两条阈值（60 / 30）</li>
+<li>能说出三条支线各自触发什么动作（检索+话术 / 培育 / 归档）</li>
+<li>能解释"解析兜底"节点存在的意义，并说出兜底值是多少（8 分 / 一般了解）</li>
+<li>能说出 RAG 防幻觉的三段设计，并诚实地说"不承诺零幻觉，只承诺可追溯"</li>
+<li>能回答"60/30 怎么来的"，并给出回测校准的方法（不粉饰"这是初始值"）</li>
+<li>能说出五条边界中最关键的两条（阈值需校准、幻觉边界）</li>
+<li>能主动讲出至少两个待改点，并说清为什么（口径不一致 / JSON 未解析 / 兜底无观测）</li>
+<li>能当场演示三条用例并解释分差（SQL 72 分 vs MQL 45 分 vs 无效 12 分）</li>
+<li>能诚实定位项目性质：完整闭环的 POC，不是生产上线项目</li>
+</ul>
+
+<div class="box good">
+<h4>最后一句提醒</h4>
+<p>这份工作流最大的说服力不在"AI"两个字，而在<strong>每个设计都能说出理由</strong>：为什么这么分维度、为什么这么定阈值、为什么这里用代码那里用模型、哪些地方还不够好。面试官招的是"能把客户需求翻译成技术方案的人"，不是"会点按钮的人"—— 你把这 13 个节点的每一个"为什么"都讲清楚，就已经超过大多数候选人了。</p>
+</div>
+
+<footer>
+AI-CRM 线索评分助手 · 工作流通关手册 ｜ 基于 Dify DSL v0.1.5 逐节点还原 ｜ 生成日期 2026-09-28<br>
+配套材料：Dify导入_AI-CRM线索评分助手.yml · 客户案例文档_AI-CRM线索助手.md · Dify导入说明.md · 高意向客户特征分析报告.html
+</footer>
+
+</div>
+</body>
+</html>
