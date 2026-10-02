@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>使用指南 · 智评 LeadScore</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:"PingFang SC","Microsoft YaHei",system-ui,sans-serif;background:#f8fafc;color:#1e293b}
+nav{position:sticky;top:0;background:rgba(255,255,255,.92);backdrop-filter:blur(8px);border-bottom:1px solid #e2e8f0;display:flex;align-items:center;justify-content:space-between;padding:12px 5vw;z-index:9}
+.logo{font-weight:800;font-size:16px;color:#1d4ed8;display:flex;align-items:center;gap:8px}
+.logo span{background:#1d4ed8;color:#fff;border-radius:8px;width:24px;height:24px;display:inline-flex;align-items:center;justify-content:center;font-size:13px}
+nav a{color:#475569;text-decoration:none;font-size:14px;margin-left:22px}
+nav a:hover,nav a.on{color:#1d4ed8;font-weight:600}
+.wrap{max-width:860px;margin:30px auto;padding:0 18px 60px}
+h1{font-size:24px;margin-bottom:6px}
+.sub{color:#64748b;font-size:13px;margin-bottom:26px}
+.card{background:#fff;border-radius:14px;padding:22px;box-shadow:0 1px 4px rgba(15,23,42,.08);margin-bottom:16px}
+.card h2{font-size:16px;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.card h2::before{content:"";width:4px;height:16px;background:#2563eb;border-radius:2px}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{background:#f1f5f9;text-align:left;padding:9px 10px;color:#475569;font-weight:600}
+td{padding:9px 10px;border-top:1px solid #eef2f7;color:#334155;line-height:1.7}
+.rule{display:flex;gap:12px;flex-wrap:wrap;margin-top:6px}
+.r{flex:1;min-width:200px;border-radius:10px;padding:14px;color:#fff}
+.r b{font-size:18px}
+.r p{font-size:12px;opacity:.92;margin-top:4px;line-height:1.7}
+.r1{background:linear-gradient(135deg,#dc2626,#ef4444)}
+.r2{background:linear-gradient(135deg,#1d4ed8,#3b82f6)}
+.r3{background:linear-gradient(135deg,#64748b,#94a3b8)}
+ol,ul{padding-left:20px;font-size:13px;color:#334155;line-height:2}
+code{background:#f1f5f9;border-radius:5px;padding:1px 6px;font-size:12px;color:#b91c1c}
+footer{background:#0f172a;color:#94a3b8;text-align:center;font-size:12px;padding:24px 16px;line-height:1.9}
+footer a{color:#60a5fa;text-decoration:none}
+</style>
+</head>
+<body>
+<nav>
+  <div class="logo"><span>智</span>智评 LeadScore</div>
+  <div>
+    <a href="index.html">首页</a>
+    <a href="workbench.html">评分工作台</a>
+    <a class="on" href="guide.html">使用指南</a>
+  </div>
+</nav>
+<div class="wrap">
+  <h1>使用指南</h1>
+  <div class="sub">3 分钟看懂评分规则、字段含义与 API 接入方式</div>
+
+  <div class="card">
+    <h2>分级规则一览</h2>
+    <div class="rule">
+      <div class="r r1"><b>≥ 60 分 · SQL</b><p>销售可直接跟进的高意向线索，自动生成含知识库引用的跟进建议</p></div>
+      <div class="r r2"><b>30 – 59 分 · MQL</b><p>有潜在价值但尚未成熟，进入市场培育池，自动生成触达方案</p></div>
+      <div class="r r3"><b>&lt; 30 分 · 无效</b><p>非决策场景（如学生作业、闲聊）自动过滤并给出过滤理由</p></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>字段说明</h2>
+    <table>
+      <tr><th>字段</th><th>必填</th><th>说明与评分影响</th></tr>
+      <tr><td>客户原始留言</td><td>是</td><td>留言原文，供大模型做结构化提取与意图识别；越接近客户真实口吻越准</td></tr>
+      <tr><td>行业</td><td>是</td><td>影响属性分：软件/互联网 +15、金融 +12、制造业/医疗 +10、教育 +5、学生个人 −20</td></tr>
+      <tr><td>公司规模</td><td>是</td><td>500人以上 +15 → 个人/无 −5，体现采购能力</td></tr>
+      <tr><td>岗位</td><td>是</td><td>IT负责人 +15、采购负责人 +12、普通员工 +3；岗位权重大于规模权重（数据分析结论）</td></tr>
+      <tr><td>近期行为</td><td>否</td><td>顿号分隔。预约产品演示 +15、打开报价邮件 +15、观看演示视频 +12、访问集成对接页 +10、下载白皮书 +8，封顶 25 分</td></tr>
+      <tr><td>公司名称</td><td>否</td><td>仅用于话术个性化称呼，不参与评分</td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <h2>如何接入你自己的系统（API）</h2>
+    <ul>
+      <li>本站「评分工作台」通过 <b>Dify 后端服务 API</b> 直连工作流，接口地址：<code>https://api.dify.ai/v1/workflows/run</code></li>
+      <li>请求方式：<code>POST</code>，Header 携带 <code>Authorization: Bearer app-xxxx</code>，Body 传入 <code>inputs</code>（上表 6 个字段）与 <code>response_mode: "streaming"</code></li>
+      <li><b>为什么用 streaming 而不是 blocking</b>：完整评分约需 98 秒，而 Dify 云端 blocking 模式有 100 秒上限，实测会偶发连接被掐断；流式调用还能实时显示「已跑完：节点名」进度</li>
+      <li>返回 <code>data.outputs</code> 包含：总分（sql_/mql_/invalid_total_score）、分级（…_grade）、意图标签、跟进话术</li>
+      <li>也可使用 Dify 自带 <b>Web 应用</b>（无需开发）、<b>MCP 服务</b>（供 AI 客户端调用）或在自家后端中转调用</li>
+      <li><b>本页如何配置 Key</b>：复制同目录 <code>config.example.js</code> 为 <code>config.js</code>，填入自己的应用密钥即可（<code>config.js</code> 不会提交到仓库，生产环境请改用后端中转隐藏 Key）</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h2>常见问题</h2>
+    <table>
+      <tr><th>问题</th><th>解答</th></tr>
+      <tr><td>为什么同一留言两次评分略有差异？</td><td>意图分由大模型生成，存在合理浮动（±3 分），不影响大局；规则分部分完全一致</td></tr>
+      <tr><td>学生线索为什么被判无效？</td><td>留言出现「作业 / 课程 / 毕设 / 考试」等非决策场景词时，意图分强制归入 0-5 档</td></tr>
+      <tr><td>话术里的产品信息可靠吗？</td><td>SQL 话术优先引用知识库资料；知识库未覆盖的功能会明确标注「需与产品团队确认」，不编造</td></tr>
+      <tr><td>这个 POC 有哪些使用限制？</td><td>不含生产级存储 / 权限 / 并发设计，评分阈值为演示参数；正式落地需按真实成交数据回归校准</td></tr>
+    </table>
+  </div>
+</div>
+<footer>智评 LeadScore · AI CRM 线索评分助手（POC 演示）· 页面：<a href="index.html">首页</a> / <a href="workbench.html">评分工作台</a></footer>
+</body>
+</html>

@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI CRM 线索评分助手 · 单页 Demo</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:"PingFang SC","Microsoft YaHei",system-ui,sans-serif;background:#f0f4f8;color:#1e293b;min-height:100vh}
+.header{background:linear-gradient(135deg,#1e3a8a,#2563eb);color:#fff;padding:28px 24px;text-align:center}
+.header h1{font-size:22px;font-weight:700}
+.header p{font-size:13px;opacity:.85;margin-top:6px}
+.wrap{max-width:1060px;margin:24px auto;padding:0 16px;display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media(max-width:860px){.wrap{grid-template-columns:1fr}}
+.card{background:#fff;border-radius:14px;padding:20px;box-shadow:0 1px 4px rgba(15,23,42,.08)}
+.card h2{font-size:15px;color:#334155;margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.card h2::before{content:"";width:4px;height:16px;background:#2563eb;border-radius:2px;display:inline-block}
+label{display:block;font-size:12px;color:#64748b;margin:10px 0 4px}
+input,select,textarea{width:100%;border:1px solid #e2e8f0;border-radius:8px;padding:9px 10px;font-size:13px;color:#1e293b;background:#f8fafc;outline:none;transition:.15s}
+input:focus,select:focus,textarea:focus{border-color:#2563eb;background:#fff;box-shadow:0 0 0 3px rgba(37,99,235,.1)}
+textarea{resize:vertical;min-height:88px}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.btns{display:flex;gap:10px;margin-top:16px}
+.btn{flex:1;border:none;border-radius:9px;padding:11px 0;font-size:14px;font-weight:600;cursor:pointer;transition:.15s}
+.btn-main{background:#2563eb;color:#fff}
+.btn-main:hover{background:#1d4ed8}
+.btn-main:disabled{background:#94a3b8;cursor:not-allowed}
+.btn-sub{background:#eef2ff;color:#2563eb;border:1px solid #c7d2fe;flex:0 0 auto;padding:11px 14px}
+.hint{font-size:11px;color:#94a3b8;margin-top:10px;line-height:1.6}
+/* 结果区 */
+.empty{color:#94a3b8;font-size:13px;text-align:center;padding:56px 0}
+.score-box{display:flex;align-items:center;gap:18px;margin-bottom:14px}
+.ring{width:110px;height:110px;flex:0 0 auto}
+.ring-bg{stroke:#e2e8f0}
+.ring-fg{stroke-linecap:round;transition:stroke-dashoffset 1s ease}
+.ring-num{font-size:26px;font-weight:800;fill:#1e293b}
+.ring-lab{font-size:10px;fill:#94a3b8}
+.badge{display:inline-block;padding:4px 14px;border-radius:999px;font-size:13px;font-weight:700;color:#fff}
+.b-SQL{background:#dc2626}.b-MQL{background:#2563eb}.b-INVALID{background:#94a3b8}
+.tagline{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+.tag{font-size:11px;background:#f1f5f9;color:#475569;border-radius:6px;padding:3px 8px}
+.tag.hl{background:#fff7ed;color:#c2410c;border:1px solid #fed7aa}
+.advice{margin-top:14px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:14px;font-size:13px;line-height:1.9;white-space:pre-wrap;color:#334155;max-height:420px;overflow:auto}
+.err{margin-top:14px;background:#fef2f2;border:1px solid #fecaca;color:#b91c1c;border-radius:10px;padding:12px;font-size:12px;line-height:1.7;display:none}
+.meta{font-size:11px;color:#94a3b8;margin-top:10px}
+.footer{text-align:center;font-size:11px;color:#94a3b8;padding:18px 0 26px;line-height:1.8}
+.copy{font-size:11px;color:#2563eb;cursor:pointer;background:none;border:none;float:right}
+.spin{display:inline-block;width:14px;height:14px;border:2px solid #fff;border-top-color:transparent;border-radius:50%;animation:r .7s linear infinite;vertical-align:-2px;margin-right:6px}
+@keyframes r{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+<div class="header">
+  <h1>🎯 AI CRM 线索评分助手</h1>
+  <p>输入一条客户线索 → 自动评分分级 → 生成个性化跟进话术（由 Dify 工作流实时驱动）</p>
+</div>
+<div class="wrap">
+  <!-- 左：输入 -->
+  <div class="card">
+    <h2>线索信息</h2>
+    <label>公司名称（选填）</label>
+    <input id="company" placeholder="例：杭州联鲸科技">
+    <label>客户原始留言 *</label>
+    <textarea id="lead_raw" placeholder="粘贴客户在官网/表单/微信里的留言原文…"></textarea>
+    <div class="row2">
+      <div><label>行业 *</label>
+        <select id="industry">
+          <option value="">请选择</option>
+          <option>软件/互联网</option><option>制造业</option><option>金融</option>
+          <option>医疗</option><option>教育</option><option>其他</option><option>学生个人</option>
+        </select></div>
+      <div><label>公司规模 *</label>
+        <select id="company_size">
+          <option value="">请选择</option>
+          <option>500人以上</option><option>100-499人</option><option>20-99人</option>
+          <option>1-19人</option><option>个人/无</option>
+        </select></div>
+    </div>
+    <label>岗位 *</label>
+    <select id="job_title">
+      <option value="">请选择</option>
+      <option>IT负责人/技术总监</option><option>采购/商务负责人</option>
+      <option>销售/市场负责人</option><option>普通员工</option><option>学生</option>
+    </select>
+    <label>近期行为（顿号分隔，可留空）</label>
+    <input id="behaviors" placeholder="例：下载白皮书、预约产品演示">
+    <div class="btns">
+      <button class="btn btn-sub" onclick="fillDemo()">填入示例</button>
+      <button class="btn btn-main" id="runBtn" onclick="run()">开始评分</button>
+    </div>
+    <div class="hint">评分模型：属性分 45 + 行为分 25 + 意图分 30 → ≥60 判 SQL 高意向 · ≥30 判 MQL 培育 · 其余过滤。<br>本页直连 Dify 后端服务 API（workflow /run），每次运行消耗一次工作流执行。</div>
+  </div>
+  <!-- 右：结果 -->
+  <div class="card">
+    <h2>评分结果</h2>
+    <div id="empty" class="empty">提交左侧线索后，这里展示评分、分级与跟进话术</div>
+    <div id="result" style="display:none">
+      <div class="score-box">
+        <svg class="ring" viewBox="0 0 120 120">
+          <circle class="ring-bg" cx="60" cy="60" r="52" fill="none" stroke-width="10"/>
+          <circle id="arc" class="ring-fg" cx="60" cy="60" r="52" fill="none" stroke-width="10"
+            stroke-dasharray="326.7" stroke-dashoffset="326.7" transform="rotate(-90 60 60)"/>
+          <text id="scoreNum" class="ring-num" x="60" y="62" text-anchor="middle">0</text>
+          <text class="ring-lab" x="60" y="80" text-anchor="middle">综合得分</text>
+        </svg>
+        <div>
+          <span id="gradeBadge" class="badge">—</span>
+          <div class="tagline">
+            <span id="tagIntent" class="tag hl">意图：—</span>
+            <span class="tag">模型：属性45+行为25+意图30</span>
+          </div>
+          <div id="meta" class="meta"></div>
+        </div>
+      </div>
+      <div style="font-size:12px;color:#64748b;margin-bottom:6px">跟进建议 <button class="copy" onclick="copyAdvice()">复制全文</button></div>
+      <div id="advice" class="advice"></div>
+    </div>
+    <div id="err" class="err"></div>
+  </div>
+</div>
+<div class="footer">Powered by Dify Workflow API · 前端单页直连方案（Demo 用，API Key 通过 config.js 注入，不随仓库提交）</div>
+<script src="config.js"></script>
+<script>
+const API_URL='https://api.dify.ai/v1/workflows/run';
+const API_KEY=(window.DIFY_API_KEY||'').trim();   // 见同目录 config.example.js
+function fillDemo(){
+  document.getElementById('company').value='杭州联鲸科技';
+  document.getElementById('lead_raw').value='我们是连锁零售企业，现有会员系统想接入你们的CRM，需要通过API把线下门店订单同步过来，另外想了解报价，希望本周安排演示';
+  document.getElementById('industry').value='制造业';
+  document.getElementById('company_size').value='500人以上';
+  document.getElementById('job_title').value='IT负责人/技术总监';
+  document.getElementById('behaviors').value='预约产品演示、打开报价邮件';
+}
+async function run(){
+  const lead=document.getElementById('lead_raw').value.trim();
+  const industry=document.getElementById('industry').value;
+  const size=document.getElementById('company_size').value;
+  const job=document.getElementById('job_title').value;
+  const errBox=document.getElementById('err');
+  errBox.style.display='none';
+  if(!lead||!industry||!size||!job){showErr('请先填写带 * 的必填项（留言 / 行业 / 公司规模 / 岗位）');return;}
+  if(!API_KEY){showErr('未配置 API Key：请参考同目录 config.example.js，新建 config.js 并写入 window.DIFY_API_KEY="app-你的密钥"');return;}
+  const btn=document.getElementById('runBtn');
+  btn.disabled=true;btn.innerHTML='<span class="spin"></span>评分中…';
+  try{
+    // 流式调用：完整评分约需 60-100 秒，超过 blocking 100s 上限，必须用 streaming
+    const res=await fetch(API_URL,{method:'POST',
+      headers:{'Authorization':'Bearer '+API_KEY,'Content-Type':'application/json'},
+      body:JSON.stringify({inputs:(()=>{
+        const c=document.getElementById('company').value.trim()||'未知公司',
+              b=document.getElementById('behaviors').value.trim();
+        return {
+          company:c,lead_raw:lead,industry:industry,company_size:size,job_title:job,behaviors:b,
+          input_text:`【公司】${c}\n【行业】${industry}\n【规模】${size}\n【岗位】${job}\n【近期行为】${b||'无'}\n【客户留言】${lead}`
+        };})(),response_mode:'streaming',user:'web-demo-'+Date.now()})});
+    if(!res.ok){const j=await res.json().catch(()=>({}));throw new Error(j.message||('HTTP '+res.status));}
+    const reader=res.body.getReader(),dec=new TextDecoder('utf-8');
+    let buf='',data=null;
+    for(;;){
+      const {done,value}=await reader.read();
+      if(done)break;
+      buf+=dec.decode(value,{stream:true});
+      const lines=buf.split('\n');buf=lines.pop();
+      for(const line of lines){
+        const s=line.trim();
+        if(!s.startsWith('data:'))continue;
+        let ev;try{ev=JSON.parse(s.slice(5));}catch(e){continue;}
+        if(ev.event==='node_finished'&&ev.data&&ev.data.title)
+          btn.innerHTML='<span class="spin"></span>已跑完：'+ev.data.title;
+        else if(ev.event==='workflow_finished')data=ev.data;
+        else if(ev.event==='error')throw new Error(ev.message||JSON.stringify(ev).slice(0,150));
+      }
+    }
+    if(!data)throw new Error('未收到工作流结果（连接提前中断）');
+    render(data);
+  }catch(e){
+    if(e instanceof TypeError)showErr('网络请求失败：可能是浏览器跨域(CORS)或网络不通。可改用本地服务器打开本页，或检查 API Key 与网络。');
+    else showErr('调用失败：'+e.message);
+  }finally{btn.disabled=false;btn.textContent='开始评分';}
+}
+function render(data){
+  const o=data.outputs||{};
+  // 剥离推理模型的思考过程（<think>…</think> 或未闭合的 <think>…）
+  const clean=s=>String(s??'').replace(/<think>[\s\S]*?<\/think>/gi,'').replace(/<think>[\s\S]*/i,'').trim();
+  for(const k of Object.keys(o))if(typeof o[k]==='string')o[k]=clean(o[k]);
+  const pick=s=>Object.keys(o).find(k=>k===s||k.endsWith(s));
+  const total=o[pick('total_score')], grade=o[pick('grade')]||'—';
+  const tag=o['intent_tag'], advice=o['followup_advice']||o['nurture_plan']||o['filter_reason']||'';
+  document.getElementById('empty').style.display='none';
+  document.getElementById('result').style.display='block';
+  document.getElementById('scoreNum').textContent=(total??'—');
+  const c=grade==='SQL'?'#dc2626':grade==='MQL'?'#2563eb':'#94a3b8';
+  const arc=document.getElementById('arc');arc.style.stroke=c;
+  const pct=Math.max(0,Math.min(100,Number(total)||0))/100*326.7;
+  requestAnimationFrame(()=>arc.style.strokeDashoffset=326.7-pct);
+  const b=document.getElementById('gradeBadge');
+  b.textContent=grade==='SQL'?'SQL · 高意向，销售可直接跟进':grade==='MQL'?'MQL · 进入培育池':grade==='INVALID'?'无效 · 自动过滤':grade;
+  b.className='badge b-'+grade;
+  document.getElementById('tagIntent').textContent='意图：'+(tag||'—');
+  document.getElementById('advice').textContent=advice||'（无话术输出）';
+  const sec=data.elapsed_time?Math.round(data.elapsed_time*1000):'—';
+  document.getElementById('meta').textContent='耗时 '+sec+' ms · Tokens '+((data.total_tokens??'—'))+' · 运行ID '+(data.id||'—').slice(0,8);
+  window._advice=advice;
+}
+function showErr(m){const e=document.getElementById('err');e.textContent=m;e.style.display='block';document.getElementById('result').style.display='none';document.getElementById('empty').style.display='none';}
+function copyAdvice(){navigator.clipboard.writeText(window._advice||'');event.target.textContent='已复制 ✓';setTimeout(()=>event.target.textContent='复制全文',1500);}
+</script>
+</body>
+</html>

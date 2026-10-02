@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>智评 LeadScore · AI 线索评分与分级平台</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:"PingFang SC","Microsoft YaHei",system-ui,sans-serif;background:#f8fafc;color:#1e293b}
+nav{position:sticky;top:0;background:rgba(255,255,255,.92);backdrop-filter:blur(8px);border-bottom:1px solid #e2e8f0;display:flex;align-items:center;justify-content:space-between;padding:14px 6vw;z-index:9}
+.logo{font-weight:800;font-size:17px;color:#1d4ed8;display:flex;align-items:center;gap:8px}
+.logo span{background:#1d4ed8;color:#fff;border-radius:8px;width:26px;height:26px;display:inline-flex;align-items:center;justify-content:center;font-size:14px}
+nav a{color:#475569;text-decoration:none;font-size:14px;margin-left:26px}
+nav a.on,nav a:hover{color:#1d4ed8;font-weight:600}
+nav a.cta{background:#1d4ed8;color:#fff;padding:8px 18px;border-radius:8px;margin-left:26px}
+.hero{background:linear-gradient(135deg,#1e3a8a 0%,#2563eb 60%,#3b82f6 100%);color:#fff;text-align:center;padding:84px 20px 96px}
+.hero h1{font-size:38px;font-weight:800;letter-spacing:1px}
+.hero p{margin:16px auto 0;max-width:620px;font-size:15px;opacity:.9;line-height:1.9}
+.hero .btn{display:inline-block;margin-top:30px;background:#fff;color:#1d4ed8;font-weight:700;font-size:15px;padding:13px 38px;border-radius:10px;text-decoration:none;box-shadow:0 8px 24px rgba(0,0,0,.18)}
+.hero .btn:hover{transform:translateY(-2px)}
+.sec{max-width:1020px;margin:0 auto;padding:56px 20px}
+.sec h2{text-align:center;font-size:24px;margin-bottom:8px}
+.sec .sub{text-align:center;color:#64748b;font-size:13px;margin-bottom:36px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+@media(max-width:760px){.grid3{grid-template-columns:1fr}}
+.model{background:#fff;border-radius:14px;padding:26px 22px;box-shadow:0 1px 4px rgba(15,23,42,.08);text-align:center;border-top:4px solid #2563eb}
+.model .num{font-size:34px;font-weight:800;color:#1d4ed8}
+.model .num small{font-size:13px;color:#94a3b8;font-weight:400}
+.model h3{font-size:15px;margin:6px 0}
+.model p{font-size:12px;color:#64748b;line-height:1.8}
+.m1{border-color:#dc2626}.m1 .num{color:#dc2626}
+.m2{border-color:#f59e0b}.m2 .num{color:#d97706}
+.m3{border-color:#2563eb}
+.steps{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:10px}
+@media(max-width:760px){.steps{grid-template-columns:1fr 1fr}}
+.step{background:#fff;border-radius:12px;padding:20px 16px;box-shadow:0 1px 3px rgba(15,23,42,.07)}
+.step b{color:#1d4ed8;font-size:13px}
+.step p{font-size:12px;color:#64748b;margin-top:6px;line-height:1.7}
+footer{background:#0f172a;color:#94a3b8;text-align:center;font-size:12px;padding:26px 16px;line-height:1.9}
+footer a{color:#60a5fa;text-decoration:none}
+</style>
+</head>
+<body>
+<nav>
+  <div class="logo"><span>智</span>智评 LeadScore</div>
+  <div>
+    <a class="on" href="index.html">首页</a>
+    <a href="workbench.html">评分工作台</a>
+    <a href="guide.html">使用指南</a>
+    <a class="cta" href="workbench.html">立即体验 →</a>
+  </div>
+</nav>
+
+<section class="hero">
+  <h1>让每一条销售线索，都被正确对待</h1>
+  <p>销售团队最常见的浪费，是把精力花在永远不成交的线索上。<br>智评 LeadScore 基于「属性 + 行为 + 意图」三维评分模型，自动把线索分为 SQL / MQL / 无效三级，并为每条高意向线索生成可直接使用的跟进话术。</p>
+  <a class="btn" href="workbench.html">免费体验评分 →</a>
+</section>
+
+<div class="sec">
+  <h2>三维评分模型</h2>
+  <div class="sub">透明可解释 · 每一分都有依据，拒绝黑盒</div>
+  <div class="grid3">
+    <div class="model m1"><div class="num">45<small> 分</small></div><h3>静态属性分</h3><p>行业 + 公司规模 + 岗位权重<br>采购/IT 负责人权重最高，<br>学生与个人线索自动降档</p></div>
+    <div class="model m2"><div class="num">25<small> 分</small></div><h3>行为加分</h3><p>预约演示、打开报价邮件、<br>访问集成对接页等强信号加权，<br>多次访问官网等弱信号低分</p></div>
+    <div class="model m3"><div class="num">30<small> 分</small></div><h3>意图识别分</h3><p>大模型阅读留言原文，识别<br>集成需求 / 价格咨询 / 演示试用，<br>非决策场景自动归零</p></div>
+  </div>
+</div>
+
+<div class="sec" style="padding-top:8px">
+  <h2>四步自动化流程</h2>
+  <div class="sub">由 Dify 13 节点工作流驱动，全程秒级完成</div>
+  <div class="steps">
+    <div class="step"><b>01 结构化提取</b><p>大模型把非结构化留言清洗成标准字段：核心诉求、关键词、联系方式</p></div>
+    <div class="step"><b>02 意图识别</b><p>从销售视角判断意向强度，输出 0-30 意图分与意图标签</p></div>
+    <div class="step"><b>03 规则评分</b><p>属性分 + 行为分 + 意图分合成总分，≥60 SQL · ≥30 MQL · 其余过滤</p></div>
+    <div class="step"><b>04 话术生成</b><p>SQL 生成跟进建议（含知识库引用），MQL 生成培育触达方案</p></div>
+  </div>
+</div>
+
+<footer>
+  智评 LeadScore · AI CRM 线索评分助手（POC 演示）<br>
+  后端由 <a href="https://dify.ai" target="_blank">Dify Workflow</a> 驱动 · 页面：<a href="workbench.html">评分工作台</a> / <a href="guide.html">使用指南</a>
+</footer>
+</body>
+</html>

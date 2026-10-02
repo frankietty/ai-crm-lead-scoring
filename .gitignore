@@ -18,3 +18,5 @@ Thumbs.db
 # 本地环境配置（切勿提交任何密钥）
 .env
 *.local
+web-demo/config.js
+web-demo/**/config.js

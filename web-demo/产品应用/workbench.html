@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>评分工作台 · 智评 LeadScore</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:"PingFang SC","Microsoft YaHei",system-ui,sans-serif;background:#f0f4f8;color:#1e293b}
+nav{position:sticky;top:0;background:rgba(255,255,255,.92);backdrop-filter:blur(8px);border-bottom:1px solid #e2e8f0;display:flex;align-items:center;justify-content:space-between;padding:12px 5vw;z-index:9}
+.logo{font-weight:800;font-size:16px;color:#1d4ed8;display:flex;align-items:center;gap:8px}
+.logo span{background:#1d4ed8;color:#fff;border-radius:8px;width:24px;height:24px;display:inline-flex;align-items:center;justify-content:center;font-size:13px}
+nav a{color:#475569;text-decoration:none;font-size:14px;margin-left:22px}
+nav a.on,nav a:hover{color:#1d4ed8;font-weight:600}
+.wrap{max-width:1100px;margin:22px auto;padding:0 16px;display:grid;grid-template-columns:420px 1fr;gap:16px}
+@media(max-width:900px){.wrap{grid-template-columns:1fr}}
+.card{background:#fff;border-radius:14px;padding:20px;box-shadow:0 1px 4px rgba(15,23,42,.08)}
+.card h2{font-size:15px;color:#334155;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.card h2::before{content:"";width:4px;height:16px;background:#2563eb;border-radius:2px}
+label{display:block;font-size:12px;color:#64748b;margin:9px 0 4px}
+input,select,textarea{width:100%;border:1px solid #e2e8f0;border-radius:8px;padding:9px 10px;font-size:13px;background:#f8fafc;outline:none;transition:.15s}
+input:focus,select:focus,textarea:focus{border-color:#2563eb;background:#fff;box-shadow:0 0 0 3px rgba(37,99,235,.1)}
+textarea{resize:vertical;min-height:96px}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.btns{display:flex;gap:10px;margin-top:14px}
+.btn{border:none;border-radius:9px;padding:11px 22px;font-size:14px;font-weight:600;cursor:pointer}
+.btn-main{background:#1d4ed8;color:#fff;flex:1}
+.btn-main:hover{background:#1e40af}
+.btn-main:disabled{background:#94a3b8;cursor:not-allowed}
+.btn-sub{background:#eef2ff;color:#1d4ed8;border:1px solid #c7d2fe}
+.hint{font-size:11px;color:#94a3b8;margin-top:10px;line-height:1.7}
+.empty{color:#94a3b8;font-size:13px;text-align:center;padding:70px 0}
+.score-box{display:flex;align-items:center;gap:18px}
+.ring{width:118px;height:118px;flex:0 0 auto}
+.ring-bg{stroke:#e2e8f0}.ring-fg{stroke-linecap:round;transition:stroke-dashoffset 1s ease}
+.ring-num{font-size:27px;font-weight:800;fill:#1e293b}.ring-lab{font-size:10px;fill:#94a3b8}
+.badge{display:inline-block;padding:4px 14px;border-radius:999px;font-size:13px;font-weight:700;color:#fff}
+.b-SQL{background:#dc2626}.b-MQL{background:#1d4ed8}.b-INVALID{background:#94a3b8}
+.tagline{display:flex;gap:8px;flex-wrap:wrap;margin-top:9px}
+.tag{font-size:11px;background:#f1f5f9;color:#475569;border-radius:6px;padding:3px 8px}
+.tag.hl{background:#fff7ed;color:#c2410c;border:1px solid #fed7aa}
+.advice{margin-top:14px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:14px;font-size:13px;line-height:1.9;white-space:pre-wrap;color:#334155;max-height:400px;overflow:auto}
+.err{margin-top:14px;background:#fef2f2;border:1px solid #fecaca;color:#b91c1c;border-radius:10px;padding:12px;font-size:12px;line-height:1.7;display:none}
+.meta{font-size:11px;color:#94a3b8;margin-top:10px}
+.copy{font-size:11px;color:#1d4ed8;cursor:pointer;background:none;border:none;float:right}
+.spin{display:inline-block;width:14px;height:14px;border:2px solid #fff;border-top-color:transparent;border-radius:50%;animation:r .7s linear infinite;vertical-align:-2px;margin-right:6px}
+@keyframes r{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+<nav>
+  <div class="logo"><span>智</span>智评 LeadScore</div>
+  <div>
+    <a href="../产品应用/index.html">首页</a>
+    <a class="on" href="workbench.html">评分工作台</a>
+    <a href="guide.html">使用指南</a>
+  </div>
+</nav>
+<div class="wrap">
+  <div class="card">
+    <h2>录入线索</h2>
+    <label>公司名称（选填）</label><input id="company" placeholder="例：杭州联鲸科技">
+    <label>客户原始留言 *</label><textarea id="lead_raw" placeholder="粘贴客户在官网/表单/微信里的留言原文…"></textarea>
+    <div class="row2">
+      <div><label>行业 *</label>
+        <select id="industry"><option value="">请选择</option>
+          <option>软件/互联网</option><option>制造业</option><option>金融</option>
+          <option>医疗</option><option>教育</option><option>其他</option><option>学生个人</option></select></div>
+      <div><label>公司规模 *</label>
+        <select id="company_size"><option value="">请选择</option>
+          <option>500人以上</option><option>100-499人</option><option>20-99人</option>
+          <option>1-19人</option><option>个人/无</option></select></div>
+    </div>
+    <label>岗位 *</label>
+    <select id="job_title"><option value="">请选择</option>
+      <option>IT负责人/技术总监</option><option>采购/商务负责人</option>
+      <option>销售/市场负责人</option><option>普通员工</option><option>学生</option></select>
+    <label>近期行为（顿号分隔，可留空）</label><input id="behaviors" placeholder="例：下载白皮书、预约产品演示">
+    <div class="btns">
+      <button class="btn btn-sub" onclick="fillDemo()">填入示例</button>
+      <button class="btn btn-main" id="runBtn" onclick="run()">开始评分</button>
+    </div>
+    <div class="hint">提示：留言越接近客户真实口吻，意图识别越准。</div>
+  </div>
+  <div class="card">
+    <h2>评分结果</h2>
+    <div id="empty" class="empty">录入线索并点击「开始评分」，结果将实时显示在这里</div>
+    <div id="result" style="display:none">
+      <div class="score-box">
+        <svg class="ring" viewBox="0 0 120 120">
+          <circle class="ring-bg" cx="60" cy="60" r="52" fill="none" stroke-width="10"/>
+          <circle id="arc" class="ring-fg" cx="60" cy="60" r="52" fill="none" stroke-width="10" stroke-dasharray="326.7" stroke-dashoffset="326.7" transform="rotate(-90 60 60)"/>
+          <text id="scoreNum" class="ring-num" x="60" y="62" text-anchor="middle">0</text>
+          <text class="ring-lab" x="60" y="80" text-anchor="middle">综合得分</text>
+        </svg>
+        <div>
+          <span id="gradeBadge" class="badge">—</span>
+          <div class="tagline"><span id="tagIntent" class="tag hl">意图：—</span><span class="tag">属性45+行为25+意图30</span></div>
+          <div id="meta" class="meta"></div>
+        </div>
+      </div>
+      <div style="font-size:12px;color:#64748b;margin:14px 0 6px">跟进建议 <button class="copy" onclick="copyAdvice()">复制全文</button></div>
+      <div id="advice" class="advice"></div>
+    </div>
+    <div id="err" class="err"></div>
+  </div>
+</div>
+<script src="config.js"></script>
+<script>
+const API_URL='https://api.dify.ai/v1/workflows/run';
+const API_KEY=(window.DIFY_API_KEY||'').trim();   // 见同目录 config.example.js
+function fillDemo(){
+  company.value='杭州联鲸科技';
+  lead_raw.value='我们是连锁零售企业，现有会员系统想接入你们的CRM，需要通过API把线下门店订单同步过来，另外想了解报价，希望本周安排演示';
+  industry.value='制造业';company_size.value='500人以上';
+  job_title.value='IT负责人/技术总监';behaviors.value='预约产品演示、打开报价邮件';
+}
+async function run(){
+  const lead=lead_raw.value.trim(), ind=industry.value, size=company_size.value, job=job_title.value;
+  err.style.display='none';
+  if(!lead||!ind||!size||!job){showErr('请先填写带 * 的必填项（留言 / 行业 / 公司规模 / 岗位）');return;}
+  if(!API_KEY){showErr('未配置 API Key：请参考同目录 config.example.js，新建 config.js 并写入 window.DIFY_API_KEY="app-你的密钥"');return;}
+  const btn=runBtn;btn.disabled=true;btn.innerHTML='<span class="spin"></span>评分中…';
+  try{
+    // 流式调用：完整评分约需 60-100 秒，超过 blocking 100s 上限，必须用 streaming
+    const res=await fetch(API_URL,{method:'POST',
+      headers:{'Authorization':'Bearer '+API_KEY,'Content-Type':'application/json'},
+      body:JSON.stringify({inputs:(()=>{const c=company.value.trim()||'未知公司',b=behaviors.value.trim();return {company:c,lead_raw:lead,industry:ind,company_size:size,job_title:job,behaviors:b,input_text:`【公司】${c}\n【行业】${ind}\n【规模】${size}\n【岗位】${job}\n【近期行为】${b||'无'}\n【客户留言】${lead}`};})(),response_mode:'streaming',user:'leadscore-'+Date.now()})});
+    if(!res.ok){const j=await res.json().catch(()=>({}));throw new Error(j.message||('HTTP '+res.status));}
+    const reader=res.body.getReader(),dec=new TextDecoder('utf-8');
+    let buf='',data=null;
+    for(;;){
+      const {done,value}=await reader.read();
+      if(done)break;
+      buf+=dec.decode(value,{stream:true});
+      const lines=buf.split('\n');buf=lines.pop();
+      for(const line of lines){
+        const s=line.trim();
+        if(!s.startsWith('data:'))continue;
+        let ev;try{ev=JSON.parse(s.slice(5));}catch(e){continue;}
+        if(ev.event==='node_finished'&&ev.data&&ev.data.title)
+          btn.innerHTML='<span class="spin"></span>已跑完：'+ev.data.title;
+        else if(ev.event==='workflow_finished')data=ev.data;
+        else if(ev.event==='error')throw new Error(ev.message||JSON.stringify(ev).slice(0,150));
+      }
+    }
+    if(!data)throw new Error('未收到工作流结果（连接提前中断）');
+    render(data);
+  }catch(e){
+    if(e instanceof TypeError)showErr('网络请求失败：可能是浏览器跨域(CORS)或网络不通，建议用本地服务器打开本页再试。');
+    else showErr('调用失败：'+e.message);
+  }finally{btn.disabled=false;btn.textContent='开始评分';}
+}
+function render(data){
+  const o=data.outputs||{};
+  // 剥离推理模型的思考过程（<think>…</think> 或未闭合的 <think>…）
+  const clean=s=>String(s??'').replace(/<think>[\s\S]*?<\/think>/gi,'').replace(/<think>[\s\S]*/i,'').trim();
+  for(const k of Object.keys(o))if(typeof o[k]==='string')o[k]=clean(o[k]);
+  const pick=s=>Object.keys(o).find(k=>k===s||k.endsWith(s));
+  const total=o[pick('total_score')], grade=o[pick('grade')]||'—';
+  const tag=o['intent_tag'], advice=o['followup_advice']||o['nurture_plan']||o['filter_reason']||'';
+  // 旧版工作流兜底：线上版本只输出 summary 时，给出明确提示而不是空结果
+  if(total===undefined&&!advice&&o['summary']){
+    empty.style.display='none';result.style.display='block';
+    document.getElementById('arc').style.strokeDashoffset=326.7;
+    document.getElementById('arc').style.stroke='#94a3b8';
+    gradeBadge.textContent='工作流版本待更新';gradeBadge.className='badge b-INVALID';
+    tagIntent.textContent='检测到线上发布的是旧版工作流（仅返回摘要）';
+    document.getElementById('advice').textContent='【客户留言摘要】\n'+o['summary']+'\n\n⚠️ 评分功能需在 Dify 画布右上角点击「发布」更新线上版本后生效。';
+    meta.textContent='耗时 '+Math.round((data.elapsed_time||0)*1000)+' ms · Tokens '+(data.total_tokens??'—');
+    window._advice=o['summary'];return;
+  }
+  empty.style.display='none';result.style.display='block';
+  scoreNum.textContent=(total??'—');
+  const c=grade==='SQL'?'#dc2626':grade==='MQL'?'#1d4ed8':'#94a3b8';
+  const arc=document.getElementById('arc');arc.style.stroke=c;
+  const pct=Math.max(0,Math.min(100,Number(total)||0))/100*326.7;
+  requestAnimationFrame(()=>arc.style.strokeDashoffset=326.7-pct);
+  const b=gradeBadge;
+  b.textContent=grade==='SQL'?'SQL · 高意向，销售可直接跟进':grade==='MQL'?'MQL · 进入培育池':grade==='INVALID'?'无效 · 自动过滤':grade;
+  b.className='badge b-'+grade;
+  tagIntent.textContent='意图：'+(tag||'—');
+  document.getElementById('advice').textContent=advice||'（无话术输出）';
+  const sec=data.elapsed_time?Math.round(data.elapsed_time*1000):'—';
+  meta.textContent='耗时 '+sec+' ms · Tokens '+(data.total_tokens??'—');
+  window._advice=advice;
+}
+function showErr(m){err.textContent=m;err.style.display='block';result.style.display='none';empty.style.display='none';}
+function copyAdvice(){navigator.clipboard.writeText(window._advice||'');event.target.textContent='已复制 ✓';setTimeout(()=>event.target.textContent='复制全文',1500);}
+</script>
+</body>
+</html>
